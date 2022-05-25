@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_larix/flutter_larix.dart';
+import 'package:flutter_larix_example/buttons.dart';
 
 void main() {
   runApp(const MyApp());
@@ -58,8 +59,38 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             children: [
               Text('Running on: $_platformVersion\n'),
-              const Expanded(
-                child: TesteAndroid(),
+              Expanded(
+                child: Stack(
+                  children: [
+                    Expanded(
+                      child: TesteAndroid(),
+                    ),
+                    Align(
+                      alignment: Alignment.topCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 32),
+                        child: SizedBox(
+                          height: 28,
+                          child: ElevatedButton(
+                            child: Text(
+                              "Trocar câmera",
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Colors.white,
+                              ),
+                            ),
+                            onPressed: () {},
+                          ).activeButton(
+                            context,
+                            style: ButtonStyle(
+                              elevation: MaterialStateProperty.all<double>(0.0),
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
               ),
             ],
           ),
@@ -78,8 +109,9 @@ class TesteAndroid extends StatelessWidget {
       "teste": "MAAAA"
     };
     return Container(
-      width: 300,
-      height: 300,
+      width: double.infinity,
+      //constraints: const BoxConstraints(maxHeight: 100),
+      color: Colors.blueAccent,
       child: AndroidView(
         viewType: "NativeView",
         creationParams: creationParams,

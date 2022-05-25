@@ -15,11 +15,11 @@ class NativeViewFactory extends PlatformViewFactory {
 
     Activity act;
 
-    //NativeViewFactory(Activity activity) {
-    NativeViewFactory() {
+    NativeViewFactory(Activity activity) {
+    //NativeViewFactory() {
         super(StandardMessageCodec.INSTANCE);
         Log.e("LARIX_API", "create native factory");
-        //act = activity;
+        act = activity;
     }
 
     @NonNull

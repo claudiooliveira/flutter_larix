@@ -81,7 +81,7 @@ public class StreamerFragment extends Fragment implements Streamer.Listener {
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.afl_surface, container, false);
 
         mPreviewFrame = root.findViewById(R.id.preview_afl);
-        btnFlipCamera = root.findViewById(R.id.btnFlipCamera);
+        //btnFlipCamera = root.findViewById(R.id.btnFlipCamera);
 
         mSurfaceView = root.findViewById(R.id.surface_view);
         mSurfaceView.getHolder().addCallback(mPreviewHolderCallback);

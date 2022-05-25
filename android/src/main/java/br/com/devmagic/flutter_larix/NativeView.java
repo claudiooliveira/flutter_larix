@@ -24,13 +24,13 @@ class NativeView implements PlatformView {
         container = new LinearLayout(context);
         LayoutInflater.from(context).inflate(R.layout.activity_main, this.container);
 
-        FragmentManager fm = activity.getFragmentManager();
-        fm.beginTransaction()
-                .replace(R.id.streamer, StreamerFragment.newInstance(
-                        "0",
-                        1280, 720,
-                        "rtmp://origin-v2.vewbie.com:1935/origin/2b866520-11c5-4818-9d2a-6cfdebbb8c8a"))
-                .commitAllowingStateLoss();
+//        FragmentManager fm = activity.getFragmentManager();
+//        fm.beginTransaction()
+//                .replace(R.id.streamer, StreamerFragment.newInstance(
+//                        "0",
+//                        1280, 720,
+//                        "rtmp://origin-v2.vewbie.com:1935/origin/2b866520-11c5-4818-9d2a-6cfdebbb8c8a"))
+//                .commitAllowingStateLoss();
 
     }
 

@@ -28,10 +28,13 @@ public class MainActivity extends FlutterActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.e("LARIX_API", "Let's go");
+        Log.e("LARIX_API", "Let's goooo");
 
-        viewBinding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(R.layout.activity_main);
+        //viewBinding = ActivityMainBinding.inflate(getLayoutInflater());
+        //setContentView(R.layout.activity_main);
+        //setContentView(viewBinding.getRoot());
+
+
 
         boolean cameraAllowed = ContextCompat.checkSelfPermission(
                 getContext(),
@@ -75,7 +78,7 @@ public class MainActivity extends FlutterActivity {
         //GeneratedPluginRegistrant.registerWith(flutterEngine);
         flutterEngine.getPlatformViewsController()
             .getRegistry()
-            .registerViewFactory("NativeView", new NativeViewFactory());
+            .registerViewFactory("NativeView", new NativeViewFactory(this));
         Log.e("LARIX_API", "PART 2");
     }
 
