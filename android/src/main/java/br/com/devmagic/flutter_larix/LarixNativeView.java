@@ -372,6 +372,16 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
         Log.e("LARIX_METHOD_CHANNEL", "Call >>>>>>> " + call.method);
+
+        switch(call.method) {
+            case "init":
+
+                break;
+            case "flip_camera":
+                mStreamerGL.flip("1", "1");
+                break;
+        }
+
     }
 
 //    @Override
