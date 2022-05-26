@@ -141,7 +141,6 @@ class NativeView implements PlatformView, MethodChannel.MethodCallHandler, Strea
 //                },
 //                1000);
 
-
     }
 
     private final SurfaceHolder.Callback mPreviewHolderCallback = new SurfaceHolder.Callback() {
@@ -282,6 +281,8 @@ class NativeView implements PlatformView, MethodChannel.MethodCallHandler, Strea
 
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
+
+
 
     }
 
