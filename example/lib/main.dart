@@ -58,36 +58,8 @@ class _MyAppState extends State<MyApp> {
         body: Column(
           children: [
             Text('Running on: $_platformVersion\n'),
-            Expanded(
-              child: Stack(
-                children: [
-                  TesteAndroid(),
-                  Align(
-                    alignment: Alignment.topCenter,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 32),
-                      child: SizedBox(
-                        height: 28,
-                        child: ElevatedButton(
-                          child: Text(
-                            "Trocar câmera",
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Colors.white,
-                            ),
-                          ),
-                          onPressed: () {},
-                        ).activeButton(
-                          context,
-                          style: ButtonStyle(
-                            elevation: MaterialStateProperty.all<double>(0.0),
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-              ),
+            const Expanded(
+              child: TesteAndroid(),
             ),
           ],
         ),
@@ -96,23 +68,76 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class TesteAndroid extends StatelessWidget {
+class TesteAndroid extends StatefulWidget {
   const TesteAndroid({Key? key}) : super(key: key);
 
   @override
+  State<TesteAndroid> createState() => _TesteAndroidState();
+}
+
+class _TesteAndroidState extends State<TesteAndroid> {
+  FlutterLarixController? controller;
+
+  @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic> creationParams = <String, dynamic>{
-      "teste": "MAAAA"
-    };
-    return Container(
-      width: double.infinity,
-      //constraints: const BoxConstraints(maxHeight: 100),
-      color: Colors.blueAccent,
-      child: AndroidView(
-        viewType: "NativeView",
-        creationParams: creationParams,
-        creationParamsCodec: const StandardMessageCodec(),
-      ),
+    return Stack(
+      children: [
+        Container(
+          width: double.infinity,
+          //constraints: const BoxConstraints(maxHeight: 100),
+          color: Colors.blueAccent,
+          child: FlutterLarix(
+            cameraWidth: 1280,
+            cameraHeight: 720,
+            cameraType: CAMERA_TYPE.BACK,
+            rtmpUrl:
+                "rtmp://origin-v2.vewbie.com:1935/origin/2b866520-11c5-4818-9d2a-6cfdebbb8c8a",
+            onCameraViewCreated: onCameraViewCreated,
+          ),
+        ),
+        Align(
+          alignment: Alignment.topCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 32),
+            child: SizedBox(
+              height: 28,
+              child: ElevatedButton(
+                child: Text(
+                  "Trocar câmera",
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                  ),
+                ),
+                onPressed: () {
+                  if (controller != null) {
+                    controller?.flipCamera();
+                  }
+                },
+              ).activeButton(
+                context,
+                style: ButtonStyle(
+                  elevation: MaterialStateProperty.all<double>(0.0),
+                ),
+              ),
+            ),
+          ),
+        )
+      ],
     );
+  }
+
+  void onCameraViewCreated(FlutterLarixController controller) async {
+    print("onCameraViewCreated!!!!!!!!");
+    setState(() {
+      this.controller = controller;
+    });
+
+    await controller.init();
+    // controller.scannedDataStream.listen((results) {
+    //   setState(() {
+    //     _barcodeResults = getBarcodeResults(results);
+    //   });
+    // });
   }
 }
