@@ -55,45 +55,41 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         backgroundColor: Colors.amber,
-        body: Center(
-          child: Column(
-            children: [
-              Text('Running on: $_platformVersion\n'),
-              Expanded(
-                child: Stack(
-                  children: [
-                    Expanded(
-                      child: TesteAndroid(),
-                    ),
-                    Align(
-                      alignment: Alignment.topCenter,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 32),
-                        child: SizedBox(
-                          height: 28,
-                          child: ElevatedButton(
-                            child: Text(
-                              "Trocar câmera",
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.white,
-                              ),
+        body: Column(
+          children: [
+            Text('Running on: $_platformVersion\n'),
+            Expanded(
+              child: Stack(
+                children: [
+                  TesteAndroid(),
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 32),
+                      child: SizedBox(
+                        height: 28,
+                        child: ElevatedButton(
+                          child: Text(
+                            "Trocar câmera",
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
                             ),
-                            onPressed: () {},
-                          ).activeButton(
-                            context,
-                            style: ButtonStyle(
-                              elevation: MaterialStateProperty.all<double>(0.0),
-                            ),
+                          ),
+                          onPressed: () {},
+                        ).activeButton(
+                          context,
+                          style: ButtonStyle(
+                            elevation: MaterialStateProperty.all<double>(0.0),
                           ),
                         ),
                       ),
-                    )
-                  ],
-                ),
+                    ),
+                  )
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
