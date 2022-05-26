@@ -19,55 +19,55 @@ import io.flutter.plugins.GeneratedPluginRegistrant;
 
 public class MainActivity extends FlutterActivity {
 //
-//    int CAMERA_REQUEST = 9796;
+    int CAMERA_REQUEST = 9796;
 //
 //    @Override
-//    protected void onCreate(@Nullable Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//
-//        Log.e("LARIX_API", "Let's goooo");
-//
-//        //viewBinding = ActivityMainBinding.inflate(getLayoutInflater());
-//        //setContentView(R.layout.activity_main);
-//        //setContentView(viewBinding.getRoot());
-//
-//
-//
-//        boolean cameraAllowed = ContextCompat.checkSelfPermission(
-//                getContext(),
-//                Manifest.permission.CAMERA
-//        ) == PackageManager.PERMISSION_GRANTED;
-//
-//        boolean audioAllowed = ContextCompat.checkSelfPermission(
-//                getContext(),
-//                Manifest.permission.RECORD_AUDIO
-//        ) == PackageManager.PERMISSION_GRANTED;
-//
-//        if (!audioAllowed || !cameraAllowed) {
-//            String[] permissions = new String[2];
-//            int n = 0;
-//            if (!cameraAllowed) {
-//                permissions[n++] = Manifest.permission.CAMERA;
-//            }
-//            if (!audioAllowed) {
-//                permissions[n] = Manifest.permission.RECORD_AUDIO;
-//            }
-//            ActivityCompat.requestPermissions(
-//                this,
-//                permissions,
-//                CAMERA_REQUEST
-//            );
-//        } else {
-//            //startCamera()
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        Log.e("LARIX_API", "Let's goooo");
+
+        //viewBinding = ActivityMainBinding.inflate(getLayoutInflater());
+        //setContentView(R.layout.activity_main);
+        //setContentView(viewBinding.getRoot());
+
+
+
+        boolean cameraAllowed = ContextCompat.checkSelfPermission(
+                getContext(),
+                Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED;
+
+        boolean audioAllowed = ContextCompat.checkSelfPermission(
+                getContext(),
+                Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_GRANTED;
+
+        if (!audioAllowed || !cameraAllowed) {
+            String[] permissions = new String[2];
+            int n = 0;
+            if (!cameraAllowed) {
+                permissions[n++] = Manifest.permission.CAMERA;
+            }
+            if (!audioAllowed) {
+                permissions[n] = Manifest.permission.RECORD_AUDIO;
+            }
+            ActivityCompat.requestPermissions(
+                this,
+                permissions,
+                CAMERA_REQUEST
+            );
+        } else {
+            //startCamera()
+        }
+
+//        if (savedInstanceState == null) {
+//            checkPermissionsThenSetFragment();
 //        }
-//
-////        if (savedInstanceState == null) {
-////            checkPermissionsThenSetFragment();
-////        }
-//
-//
-//
-//    }
+
+
+
+    }
 //
 //    @Override
 //    public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
