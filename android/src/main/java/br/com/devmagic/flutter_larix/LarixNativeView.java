@@ -374,12 +374,56 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         Log.e("LARIX_METHOD_CHANNEL", "Call >>>>>>> " + call.method);
 
         switch(call.method) {
-            case "init":
-
+            case "startStream":
+//                ConnectionConfig conn = new ConnectionConfig();
+//                conn.uri = mUri;
+//                mStreamerGL.createConnection(conn);
+                ConnectionConfig conn = new ConnectionConfig();
+                conn.uri = mUri;
+                mStreamerGL.createConnection(conn);
+                result.success("true");
                 break;
-            case "flip_camera":
+            case "stopStream":
+                ConnectionConfig conne = new ConnectionConfig();
+                conne.uri = null;
+                mStreamerGL.createConnection(conne);
+                result.success("true");
+                break;
+            case "flip":
                 mStreamerGL.flip("1", "1");
+                result.success("true");
                 break;
+            case "stopAudioCapture":
+                mStreamerGL.stopAudioCapture();
+                result.success("true");
+                break;
+            case "startAudioCapture":
+                Log.e("LARIX_METHOD_CHANNEL","inicio teste startAudioCapture");
+                mStreamerGL.startAudioCapture();
+                Log.e("LARIX_METHOD_CHANNEL","fim teste startAudioCapture");
+                result.success("true");
+                break;
+            case "stopVideoCapture":
+                Log.e("LARIX_METHOD_CHANNEL","inicio teste stopVideoCapture");
+                mStreamerGL.stopVideoCapture();
+                Log.e("LARIX_METHOD_CHANNEL","fim teste stopVideoCapture");
+                result.success("true");
+                break;
+            case "startVideoCapture":
+                Log.e("LARIX_METHOD_CHANNEL","inicio teste startVideoCapture");
+                mStreamerGL.startVideoCapture();
+                Log.e("LARIX_METHOD_CHANNEL","fim teste startVideoCapture");
+                result.success("true");
+                break;
+            case "setDisplayRotation":
+                mStreamerGL.setDisplayRotation(1);
+                result.success("true");
+                break;
+//            case "getActiveCameraId":
+//                mStreamerGL.getActiveCameraId();
+//                break;
+            default:
+                result.notImplemented();
         }
 
     }

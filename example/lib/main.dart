@@ -77,6 +77,10 @@ class TesteAndroid extends StatefulWidget {
 
 class _TesteAndroidState extends State<TesteAndroid> {
   FlutterLarixController? controller;
+  bool microfone = true;
+  bool camera = true;
+  bool flash = false;
+  int cameraSelected = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -96,33 +100,92 @@ class _TesteAndroidState extends State<TesteAndroid> {
           ),
         ),
         Align(
-          alignment: Alignment.topCenter,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 32),
-            child: SizedBox(
-              height: 28,
-              child: ElevatedButton(
-                child: Text(
-                  "Trocar câmera",
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                  ),
+            alignment: Alignment.bottomCenter,
+            child: Row(
+              children: [
+                GestureDetector(
+                  child: this.microfone
+                      ? Icon(Icons.mic_rounded)
+                      : Icon(Icons.mic_off_sharp),
+                  onTap: () async {
+                    if (!this.microfone) {
+                      await controller!.startAudioCapture();
+                      this.microfone = true;
+                    } else {
+                      await controller!.stopAudioCapture();
+                      this.microfone = false;
+                    }
+                    setState(() {
+
+                    });
+                  },
                 ),
-                onPressed: () {
-                  if (controller != null) {
-                    controller?.flipCamera();
-                  }
-                },
-              ).activeButton(
-                context,
-                style: ButtonStyle(
-                  elevation: MaterialStateProperty.all<double>(0.0),
+                GestureDetector(
+                  child: this.camera
+                      ? Icon(Icons.photo_camera)
+                      : Icon(Icons.no_photography),
+                  onTap: () async {
+                    if (!this.camera) {
+                      await controller!.startVideoCapture();
+                      this.camera = true;
+                    } else {
+                      await controller!.stopVideoCapture();
+                      this.camera = false;
+                    }
+                    setState(() {
+
+                    });
+                  },
                 ),
-              ),
-            ),
-          ),
-        )
+                GestureDetector(
+                  child: Icon(Icons.flip_camera_ios_rounded),
+                  onTap: () async {
+                    await controller!.setDisplayRotation();
+                    // print("camera");
+                    // bool microfone = true;
+                    // bool camera = true;
+                    // int cameraSelected = 0;
+                    // await controller!.startVideoCapture();
+                    //
+                    // await controller!.stopVideoCapture();
+                    setState(() {
+
+                    });
+                  },
+                ),
+                GestureDetector(
+                  child: this.flash ? Icon(Icons.flash_off) : Icon(Icons.flash_on),
+                  onTap: () async {
+                    // if (this.flash) {
+                    //   await controller!.startAudioCapture();
+                    //   this.flash = true;
+                    // } else {
+                    // await controller!.stopAudioCapture();
+                    // this.flash = false;
+                    // }
+                    // setState(() {
+                    //
+                    // });
+                  },
+                ),
+                GestureDetector(
+                  child: Icon(Icons.keyboard_arrow_right),
+                  onTap: () async {
+                    print("INICIOUUUUUUUUUUUUUUUU");
+                    await controller!.startStream();
+                    setState((){});
+                  },
+                ),
+                GestureDetector(
+                  child: Icon(Icons.close_rounded),
+                  onTap: () async {
+                    print("FINALIZOUUUUUUUUUUUUUUUUUU");
+                    await controller!.stopStream();
+                    setState((){});
+                  },
+                )
+              ],
+            ))
       ],
     );
   }
@@ -133,7 +196,7 @@ class _TesteAndroidState extends State<TesteAndroid> {
       this.controller = controller;
     });
 
-    await controller.init();
+    // await controller.init();
     // controller.scannedDataStream.listen((results) {
     //   setState(() {
     //     _barcodeResults = getBarcodeResults(results);
