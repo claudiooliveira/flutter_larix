@@ -82,6 +82,15 @@ class _TesteAndroidState extends State<TesteAndroid> {
   bool flash = false;
   int cameraSelected = 0;
 
+  bool get isStreaming => controller?.getStreamStatus() == STREAM_STATUS.ON;
+
+  void _flutterLarixListener() {
+    print("MUDOU CARAI");
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -97,6 +106,7 @@ class _TesteAndroidState extends State<TesteAndroid> {
             rtmpUrl:
                 "rtmp://origin-v2.vewbie.com:1935/origin/2b866520-11c5-4818-9d2a-6cfdebbb8c8a",
             onCameraViewCreated: onCameraViewCreated,
+            listener: _flutterLarixListener,
           ),
         ),
         Align(
@@ -115,26 +125,19 @@ class _TesteAndroidState extends State<TesteAndroid> {
                       await controller!.stopAudioCapture();
                       this.microfone = false;
                     }
-                    setState(() {
-
-                    });
+                    setState(() {});
                   },
                 ),
                 GestureDetector(
-                  child: this.camera
-                      ? Icon(Icons.photo_camera)
-                      : Icon(Icons.no_photography),
+                  child: isStreaming
+                      ? const Icon(Icons.no_photography)
+                      : const Icon(Icons.photo_camera),
                   onTap: () async {
-                    if (!this.camera) {
-                      await controller!.startVideoCapture();
-                      this.camera = true;
+                    if (!isStreaming) {
+                      await controller!.startStream();
                     } else {
-                      await controller!.stopVideoCapture();
-                      this.camera = false;
+                      await controller!.stopStream();
                     }
-                    setState(() {
-
-                    });
                   },
                 ),
                 GestureDetector(
@@ -148,13 +151,12 @@ class _TesteAndroidState extends State<TesteAndroid> {
                     // await controller!.startVideoCapture();
                     //
                     // await controller!.stopVideoCapture();
-                    setState(() {
-
-                    });
+                    setState(() {});
                   },
                 ),
                 GestureDetector(
-                  child: this.flash ? Icon(Icons.flash_off) : Icon(Icons.flash_on),
+                  child:
+                      this.flash ? Icon(Icons.flash_off) : Icon(Icons.flash_on),
                   onTap: () async {
                     // if (this.flash) {
                     //   await controller!.startAudioCapture();
@@ -168,22 +170,20 @@ class _TesteAndroidState extends State<TesteAndroid> {
                     // });
                   },
                 ),
-                GestureDetector(
-                  child: Icon(Icons.keyboard_arrow_right),
-                  onTap: () async {
-                    print("INICIOUUUUUUUUUUUUUUUU");
-                    await controller!.startStream();
-                    setState((){});
-                  },
-                ),
-                GestureDetector(
-                  child: Icon(Icons.close_rounded),
-                  onTap: () async {
-                    print("FINALIZOUUUUUUUUUUUUUUUUUU");
-                    await controller!.stopStream();
-                    setState((){});
-                  },
-                )
+                // GestureDetector(
+                //   child: Icon(Icons.keyboard_arrow_right),
+                //   onTap: () async {
+                //     await controller!.startStream();
+                //     setState(() {});
+                //   },
+                // ),
+                // GestureDetector(
+                //   child: Icon(Icons.close_rounded),
+                //   onTap: () async {
+                //     await controller!.stopStream();
+                //     setState(() {});
+                //   },
+                // )
               ],
             ))
       ],
@@ -191,7 +191,6 @@ class _TesteAndroidState extends State<TesteAndroid> {
   }
 
   void onCameraViewCreated(FlutterLarixController controller) async {
-    print("onCameraViewCreated!!!!!!!!");
     setState(() {
       this.controller = controller;
     });

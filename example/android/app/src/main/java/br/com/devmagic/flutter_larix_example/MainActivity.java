@@ -31,8 +31,6 @@ public class MainActivity extends FlutterActivity {
         //setContentView(R.layout.activity_main);
         //setContentView(viewBinding.getRoot());
 
-
-
         boolean cameraAllowed = ContextCompat.checkSelfPermission(
                 getContext(),
                 Manifest.permission.CAMERA
