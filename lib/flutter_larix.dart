@@ -25,6 +25,7 @@ class FlutterLarix extends StatefulWidget {
   CAMERA_TYPE cameraType;
   String rtmpUrl = "";
   final FlutterLarixCameraViewCreatedCallback onCameraViewCreated;
+  final Function listener;
   FlutterLarix({
     Key? key,
     required this.cameraWidth,
@@ -32,6 +33,7 @@ class FlutterLarix extends StatefulWidget {
     required this.rtmpUrl,
     required this.cameraType,
     required this.onCameraViewCreated,
+    required this.listener,
   }) : super(key: key);
 
   @override
@@ -60,7 +62,7 @@ class _FlutterLarixState extends State<FlutterLarix> {
   }
 
   void _onPlatformViewCreated(int id) {
-    _controller = FlutterLarixController(id);
+    _controller = FlutterLarixController(id, widget.listener);
     widget.onCameraViewCreated(_controller!);
   }
 }

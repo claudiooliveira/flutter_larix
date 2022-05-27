@@ -43,6 +43,8 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.platform.PlatformView;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -76,6 +78,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     int currentOrientation = 0;
     @NonNull
     StreamerGLBuilder builder;
+    int connectionId = 0;
 
     private @NonNull Context mContext;
     private @NonNull Activity activity;
@@ -293,7 +296,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     public void onAudioCaptureStateChanged(Streamer.CaptureState state) {
         android.util.Log.d(TAG, "onAudioCaptureStateChanged, state=" + state);
         mAudioCaptureState = state;
-        maybeCreateStream();
+        //maybeCreateStream();
     }
 
     @Override
@@ -314,6 +317,14 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     @Override
     public void onConnectionStateChanged(int i, Streamer.ConnectionState connectionState, Streamer.Status status, JSONObject jsonObject) {
 
+        Log.e("LARIX_API", "connectionState >>>> " + connectionState.toString());
+
+        List<Map<String, Object>> list = new ArrayList<>();
+        Map<String, Object> data = new HashMap<>();
+        data.put("connectionState", connectionState.name());
+        list.add(data);
+        methodChannel.invokeMethod("streamChanged", list);
+
     }
 
     private void maybeCreateStream() {
@@ -323,7 +334,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
             // audio+video encoding is running -> create stream
             ConnectionConfig conn = new ConnectionConfig();
             conn.uri = mUri;
-            mStreamerGL.createConnection(conn);
+            connectionId = mStreamerGL.createConnection(conn);
         }
     }
 
@@ -331,7 +342,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     public void onVideoCaptureStateChanged(Streamer.CaptureState state) {
         android.util.Log.e(TAG, "onVideoCaptureStateChanged, state=" + state);
         mVideoCaptureState = state;
-        maybeCreateStream();
+        //maybeCreateStream();
     }
 
     @Override
@@ -378,16 +389,21 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 //                ConnectionConfig conn = new ConnectionConfig();
 //                conn.uri = mUri;
 //                mStreamerGL.createConnection(conn);
-                ConnectionConfig conn = new ConnectionConfig();
-                conn.uri = mUri;
-                mStreamerGL.createConnection(conn);
+//                ConnectionConfig conn = new ConnectionConfig();
+//                conn.uri = mUri;
+//                connectionId = mStreamerGL.createConnection(conn);
+                maybeCreateStream();
                 result.success("true");
                 break;
             case "stopStream":
-                ConnectionConfig conne = new ConnectionConfig();
-                conne.uri = null;
-                mStreamerGL.createConnection(conne);
-                result.success("true");
+//                ConnectionConfig conne = new ConnectionConfig();
+//                conne.uri = null;
+//                mStreamerGL.createConnection(conne);
+//                result.success("true");
+                //mStreamerGL.stopVideoCapture();
+                //mStreamerGL.stopAudioCapture();
+                Log.e("STOP_CONNECTION", "ID: " + connectionId);
+                mStreamerGL.releaseConnection(connectionId);
                 break;
             case "flip":
                 mStreamerGL.flip("1", "1");
