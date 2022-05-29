@@ -85,74 +85,77 @@ class _TesteAndroidState extends State<TesteAndroid> {
         if (controller != null)
           Align(
               alignment: Alignment.bottomCenter,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GestureDetector(
-                    child: this.microfone
-                        ? Icon(Icons.mic_rounded)
-                        : Icon(Icons.mic_off_sharp),
-                    onTap: () async {
-                      if (!this.microfone) {
-                        await controller!.startAudioCapture();
-                        this.microfone = true;
-                      } else {
-                        await controller!.stopAudioCapture();
-                        this.microfone = false;
-                      }
-                      setState(() {});
-                    },
-                  ),
-                  LarixRecordButton(
-                    controller: controller!,
-                  ),
-                  GestureDetector(
-                    child: Icon(Icons.flip_camera_ios_rounded),
-                    onTap: () async {
-                      await controller!.setDisplayRotation();
-                      // print("camera");
-                      // bool microfone = true;
-                      // bool camera = true;
-                      // int cameraSelected = 0;
-                      // await controller!.startVideoCapture();
-                      //
-                      // await controller!.stopVideoCapture();
-                      setState(() {});
-                    },
-                  ),
-                  GestureDetector(
-                    child: this.flash
-                        ? Icon(Icons.flash_off)
-                        : Icon(Icons.flash_on),
-                    onTap: () async {
-                      // if (this.flash) {
-                      //   await controller!.startAudioCapture();
-                      //   this.flash = true;
-                      // } else {
-                      // await controller!.stopAudioCapture();
-                      // this.flash = false;
-                      // }
-                      // setState(() {
-                      //
-                      // });
-                    },
-                  ),
-                  // GestureDetector(
-                  //   child: Icon(Icons.keyboard_arrow_right),
-                  //   onTap: () async {
-                  //     await controller!.startStream();
-                  //     setState(() {});
-                  //   },
-                  // ),
-                  // GestureDetector(
-                  //   child: Icon(Icons.close_rounded),
-                  //   onTap: () async {
-                  //     await controller!.stopStream();
-                  //     setState(() {});
-                  //   },
-                  // )
-                ],
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 32),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    GestureDetector(
+                      child: this.microfone
+                          ? Icon(Icons.mic_rounded)
+                          : Icon(Icons.mic_off_sharp),
+                      onTap: () async {
+                        if (!this.microfone) {
+                          await controller!.startAudioCapture();
+                          this.microfone = true;
+                        } else {
+                          await controller!.stopAudioCapture();
+                          this.microfone = false;
+                        }
+                        setState(() {});
+                      },
+                    ),
+                    LarixRecordButton(
+                      controller: controller!,
+                    ),
+                    GestureDetector(
+                      child: Icon(Icons.flip_camera_ios_rounded),
+                      onTap: () async {
+                        await controller!.setDisplayRotation();
+                        // print("camera");
+                        // bool microfone = true;
+                        // bool camera = true;
+                        // int cameraSelected = 0;
+                        // await controller!.startVideoCapture();
+                        //
+                        // await controller!.stopVideoCapture();
+                        setState(() {});
+                      },
+                    ),
+                    GestureDetector(
+                      child: this.flash
+                          ? Icon(Icons.flash_off)
+                          : Icon(Icons.flash_on),
+                      onTap: () async {
+                        // if (this.flash) {
+                        //   await controller!.startAudioCapture();
+                        //   this.flash = true;
+                        // } else {
+                        // await controller!.stopAudioCapture();
+                        // this.flash = false;
+                        // }
+                        // setState(() {
+                        //
+                        // });
+                      },
+                    ),
+                    // GestureDetector(
+                    //   child: Icon(Icons.keyboard_arrow_right),
+                    //   onTap: () async {
+                    //     await controller!.startStream();
+                    //     setState(() {});
+                    //   },
+                    // ),
+                    // GestureDetector(
+                    //   child: Icon(Icons.close_rounded),
+                    //   onTap: () async {
+                    //     await controller!.stopStream();
+                    //     setState(() {});
+                    //   },
+                    // )
+                  ],
+                ),
               ))
       ],
     );
