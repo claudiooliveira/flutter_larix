@@ -1,17 +1,11 @@
 // ignore_for_file: constant_identifier_names
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_larix/flutter_larix_controller.dart';
-export 'package:flutter_larix/flutter_larix_controller.dart';
+import 'package:flutter_larix/src/flutter_larix_controller.dart';
+import 'package:flutter_larix/src/flutter_larix_controller_options.dart';
 
-// class FlutterLarix {
-//   static const MethodChannel _channel = MethodChannel('flutter_larix');
-
-//   static Future<String?> get platformVersion async {
-//     final String? version = await _channel.invokeMethod('getPlatformVersion');
-//     return version;
-//   }
-// }
+export 'package:flutter_larix/src/flutter_larix_controller.dart';
+export 'package:flutter_larix/src/widgets/larix_record_button.dart';
 
 typedef FlutterLarixCameraViewCreatedCallback = void Function(
     FlutterLarixController);
@@ -62,7 +56,16 @@ class _FlutterLarixState extends State<FlutterLarix> {
   }
 
   void _onPlatformViewCreated(int id) {
-    _controller = FlutterLarixController(id, widget.listener);
+    _controller = FlutterLarixController(
+      options: FlutterLarixControllerOptions(
+        id: id,
+        listener: widget.listener,
+        cameraWidth: widget.cameraWidth,
+        cameraHeight: widget.cameraHeight,
+        cameraType: widget.cameraType,
+        url: widget.rtmpUrl,
+      ),
+    );
     widget.onCameraViewCreated(_controller!);
   }
 }

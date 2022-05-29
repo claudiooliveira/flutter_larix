@@ -25,16 +25,13 @@ public class FlutterLarixPlugin implements FlutterPlugin, ActivityAware {
   private @Nullable FlutterPluginBinding flutterPluginBinding;
 
   final String VIEW_TYPE_ID = "br.com.devmagic.flutter_larix/nativeview";
-  String TAG = "FLUTTER_LARIX_PLUGIN";
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-    Log.e(TAG, "CALL 1");
     this.flutterPluginBinding = flutterPluginBinding;
   }
 
   private void bind(ActivityPluginBinding activityPluginBinding) {
-    Log.e(TAG, "CALL 2");
     activity = activityPluginBinding.getActivity();
     flutterPluginBinding.getPlatformViewRegistry().registerViewFactory(
             VIEW_TYPE_ID,
@@ -43,19 +40,16 @@ public class FlutterLarixPlugin implements FlutterPlugin, ActivityAware {
 
   @Override
   public void onAttachedToActivity(ActivityPluginBinding activityPluginBinding) {
-    Log.e(TAG, "CALL 3");
     bind(activityPluginBinding);
   }
 
   @Override
   public void onReattachedToActivityForConfigChanges(ActivityPluginBinding activityPluginBinding) {
-    Log.e(TAG, "CALL 4");
     bind(activityPluginBinding);
   }
 
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
-    Log.e(TAG, "CALL 5");
     this.flutterPluginBinding = null;
   }
 

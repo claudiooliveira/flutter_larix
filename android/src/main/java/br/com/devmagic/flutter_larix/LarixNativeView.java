@@ -91,13 +91,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         mCameraId = "0";
         mHandler = new Handler(Looper.getMainLooper());
         mSize = new Streamer.Size(1280, 720);
-        mUri = "rtmp://origin-v2.vewbie.com:1935/origin/2b866520-11c5-4818-9d2a-6cfdebbb8c8a";
-//        methodChannel = MethodChannel(messenger, "MagicView/$id");
-//        methodChannel.setMethodCallHandler(this);
-        Log.e("LARIX_API", "TESTEEEEE");
+        mUri = creationParams.get("url").toString();
         container = new LinearLayout(context);
         container.setOrientation(LinearLayout.VERTICAL);
-        //View view = LayoutInflater.from(context).inflate(R.layout.activity_main, this.container);
 
         methodChannel = new MethodChannel(messenger, "br.com.devmagic.flutter_larix/nativeview_" + id);
         methodChannel.setMethodCallHandler(this);
@@ -319,11 +315,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
         Log.e("LARIX_API", "connectionState >>>> " + connectionState.toString());
 
-        List<Map<String, Object>> list = new ArrayList<>();
         Map<String, Object> data = new HashMap<>();
         data.put("connectionState", connectionState.name());
-        list.add(data);
-        methodChannel.invokeMethod("streamChanged", list);
+        methodChannel.invokeMethod("streamChanged", data);
 
     }
 
@@ -383,6 +377,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
         Log.e("LARIX_METHOD_CHANNEL", "Call >>>>>>> " + call.method);
+        Log.e("LARIX_METHOD_CHANNEL", "ARGUMENTS >>>>>>> " + call.arguments);
 
         switch(call.method) {
             case "startStream":
@@ -393,6 +388,8 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 //                conn.uri = mUri;
 //                connectionId = mStreamerGL.createConnection(conn);
                 maybeCreateStream();
+                HashMap<String, Object> map = (HashMap<String, Object>) call.arguments;
+                Log.i("MyTag", "map = " + map.get("cameraWidth")); // {key=value}
                 result.success("true");
                 break;
             case "stopStream":
