@@ -60,6 +60,10 @@ class FlutterLarixController {
     await _channel.invokeMethod('setDisplayRotation');
   }
 
+  Future<void> setFlip() async {
+    await _channel.invokeMethod('flip');
+  }
+
   Future<void> stopVideoCapture() async {
     await _channel.invokeMethod('stopVideoCapture');
   }

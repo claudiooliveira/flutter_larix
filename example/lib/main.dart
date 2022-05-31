@@ -66,7 +66,7 @@ class _TesteAndroidState extends State<TesteAndroid> {
       children: [
         Container(
           width: double.infinity,
-          //constraints: const BoxConstraints(maxHeight: 100),
+          // constraints: const BoxConstraints(maxHeight: 100),
           color: Colors.blueAccent,
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -112,7 +112,7 @@ class _TesteAndroidState extends State<TesteAndroid> {
                     GestureDetector(
                       child: Icon(Icons.flip_camera_ios_rounded),
                       onTap: () async {
-                        await controller!.setDisplayRotation();
+                        await controller!.setFlip();
                         // print("camera");
                         // bool microfone = true;
                         // bool camera = true;

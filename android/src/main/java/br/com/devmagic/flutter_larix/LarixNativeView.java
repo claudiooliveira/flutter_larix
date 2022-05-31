@@ -37,6 +37,10 @@ import com.wmspanel.libstream.VideoConfig;
 
 import org.json.JSONObject;
 
+import br.com.devmagic.flutter_larix.camera.CameraInfo;
+import br.com.devmagic.flutter_larix.camera.CameraListHelper;
+import br.com.devmagic.flutter_larix.camera.CameraRegistry;
+import br.com.devmagic.flutter_larix.camera.CameraSettings;
 import io.flutter.Log;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
@@ -63,7 +67,8 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     private String mCameraId;
     private Streamer.Size mSize;
     private String mUri;
-
+    private List<CameraInfo> cameraList;
+    private CameraInfo activeCameraInfo;
     private Handler mHandler;
 
     private Streamer.CaptureState mVideoCaptureState = Streamer.CaptureState.FAILED;
@@ -215,7 +220,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         }
 
         builder = new StreamerGLBuilder();
-
+        boolean camera2 = CameraRegistry.allowCamera2Support(mContext);
+        cameraList = CameraRegistry.getCameraList(mContext, camera2);
+        activeCameraInfo = CameraSettings.getActiveCameraInfo(mContext, mCameraId, cameraList);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             builder.setContext(mContext);
         }
@@ -235,8 +242,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         builder.setSurface(mHolder.getSurface());
         builder.setSurfaceSize(new Streamer.Size(mSurfaceView.getWidth(), mSurfaceView.getHeight()));
 
-        // streamer will start capture from this camera id
-        builder.setCameraId(mCameraId);
 
         // we add single default back camera
         final CameraConfig cameraConfig = new CameraConfig();
@@ -245,6 +250,8 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
         builder.addCamera(cameraConfig);
 
+        // streamer will start capture from this camera id
+        builder.setCameraId(activeCameraInfo.cameraId);
         builder.setVideoOrientation(videoOrientation());
         builder.setDisplayRotation(displayRotation());
 
@@ -381,30 +388,29 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
         switch(call.method) {
             case "startStream":
-//                ConnectionConfig conn = new ConnectionConfig();
-//                conn.uri = mUri;
-//                mStreamerGL.createConnection(conn);
-//                ConnectionConfig conn = new ConnectionConfig();
-//                conn.uri = mUri;
-//                connectionId = mStreamerGL.createConnection(conn);
                 maybeCreateStream();
                 HashMap<String, Object> map = (HashMap<String, Object>) call.arguments;
                 Log.i("MyTag", "map = " + map.get("cameraWidth")); // {key=value}
                 result.success("true");
                 break;
             case "stopStream":
-//                ConnectionConfig conne = new ConnectionConfig();
-//                conne.uri = null;
-//                mStreamerGL.createConnection(conne);
-//                result.success("true");
-                //mStreamerGL.stopVideoCapture();
-                //mStreamerGL.stopAudioCapture();
                 Log.e("STOP_CONNECTION", "ID: " + connectionId);
                 mStreamerGL.releaseConnection(connectionId);
                 break;
             case "flip":
-                mStreamerGL.flip("1", "1");
-                result.success("true");
+                for (CameraInfo info : cameraList) {
+                    if (!info.cameraId.contains(mCameraId)) {
+                        activeCameraInfo = CameraSettings.getActiveCameraInfo(mContext, info.cameraId, cameraList);
+                    }
+                }
+                final CameraConfig flipCameraConfig = new CameraConfig();
+                flipCameraConfig.cameraId = activeCameraInfo.cameraId;
+                flipCameraConfig.videoSize = mSize;
+                builder.addCamera(flipCameraConfig);
+                mStreamerGL.flip();
+                Map<String, Object> data = new HashMap<>();
+                data.put("cameraId", activeCameraInfo.cameraId);
+                result.success(data);
                 break;
             case "stopAudioCapture":
                 mStreamerGL.stopAudioCapture();
