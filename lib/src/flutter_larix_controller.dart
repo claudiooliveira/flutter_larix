@@ -13,6 +13,7 @@ class FlutterLarixController {
   late MethodChannel _channel;
 
   STREAM_STATUS _streamStatus = STREAM_STATUS.OFF;
+  bool _muteStatus = false;
   String _connectionState = "";
   bool _torchIsOn = false;
 
@@ -45,12 +46,24 @@ class FlutterLarixController {
     await _channel.invokeMethod('stopStream');
   }
 
-  Future<void> startAudioCapture() async {
-    await _channel.invokeMethod('startAudioCapture');
+  Future<bool> startAudioCapture() async {
+    var mute = await _channel.invokeMethod('startAudioCapture');
+    updateAudioStatusCapture(mute);
+    return _muteStatus;
   }
 
-  Future<void> stopAudioCapture() async {
-    await _channel.invokeMethod('stopAudioCapture');
+  Future<bool> stopAudioCapture() async {
+    var mute = await _channel.invokeMethod('stopAudioCapture');
+    updateAudioStatusCapture(mute);
+    return _muteStatus;
+  }
+
+  updateAudioStatusCapture(audio) {
+    _muteStatus = audio['mute'] == true;
+  }
+
+  bool getMicrophoneStatus() {
+    return _muteStatus;
   }
 
   Future<void> startVideoCapture() async {
