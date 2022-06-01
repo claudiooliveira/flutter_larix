@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_larix/flutter_larix.dart';
+import 'package:flutter_larix_example/widgets/record_button.dart';
 
 void main() {
   runApp(const MyApp());
@@ -104,7 +105,7 @@ class _TesteAndroidState extends State<TesteAndroid> {
                         setState(() {});
                       },
                     ),
-                    LarixRecordButton(
+                    RecordButton(
                       controller: controller!,
                     ),
                     GestureDetector(

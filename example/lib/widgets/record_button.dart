@@ -1,21 +1,21 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_larix/src/flutter_larix_controller.dart';
+import 'package:flutter_larix/flutter_larix.dart';
 
-class LarixRecordButton extends StatefulWidget {
+class RecordButton extends StatefulWidget {
   final FlutterLarixController controller;
 
-  const LarixRecordButton({
+  const RecordButton({
     Key? key,
     required this.controller,
   }) : super(key: key);
 
   @override
-  State<LarixRecordButton> createState() => _LarixRecordButtonState();
+  State<RecordButton> createState() => _RecordButtonState();
 }
 
-class _LarixRecordButtonState extends State<LarixRecordButton>
+class _RecordButtonState extends State<RecordButton>
     with SingleTickerProviderStateMixin {
   late double _scale;
   bool _pulse = true;

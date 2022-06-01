@@ -5,7 +5,6 @@ import 'package:flutter_larix/src/flutter_larix_controller.dart';
 import 'package:flutter_larix/src/flutter_larix_controller_options.dart';
 
 export 'package:flutter_larix/src/flutter_larix_controller.dart';
-export 'package:flutter_larix/src/widgets/larix_record_button.dart';
 
 typedef FlutterLarixCameraViewCreatedCallback = void Function(
     FlutterLarixController);
