@@ -13,8 +13,8 @@ class CameraControlButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       child: SizedBox(
-        width: 36,
-        height: 36,
+        width: 42,
+        height: 42,
         child: icon,
       ),
       onTap: () => onTap.call(),
