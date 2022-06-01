@@ -56,19 +56,13 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     @NonNull private final LinearLayout container;
 
     private static final String TAG = "StreamerFragment";
-
-    private static final String URI = "uri";
-    private static final String CAMERA_ID = "camera_id";
-    private static final String WIDTH = "width";
-    private static final String HEIGHT = "heigth";
-
     private StreamerGL mStreamerGL;
 
+    private List<CameraInfo> cameraList;
+    private CameraInfo activeCameraInfo;
     private String mCameraId;
     private Streamer.Size mSize;
     private String mUri;
-    private List<CameraInfo> cameraList;
-    private CameraInfo activeCameraInfo;
     protected boolean mIsMuted;
     private Handler mHandler;
 
@@ -275,7 +269,10 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     }
 
     @Override
-    public void dispose() {}
+    public void dispose() {
+        mStreamerGL.release();
+        mStreamerGL = null;
+    }
 
     private boolean isPortrait() {
         return mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
