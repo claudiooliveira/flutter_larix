@@ -69,6 +69,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     private String mUri;
     private List<CameraInfo> cameraList;
     private CameraInfo activeCameraInfo;
+    protected boolean mIsMuted;
     private Handler mHandler;
 
     private Streamer.CaptureState mVideoCaptureState = Streamer.CaptureState.FAILED;
@@ -339,6 +340,22 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         }
     }
 
+    protected void mute(boolean mute) {
+        if (mStreamerGL == null) {
+            return;
+        }
+        // How to mute audio:
+        // Option 1 - stop audio capture and as result stop sending audio packets to server
+        // Some players can stop playback if client keeps sending video, but sends no audio packets
+        // Option 2 (workaround) - set PCM sound level to zero and encode
+        // This produces silence in audio stream
+        
+        if (mAudioCaptureState == Streamer.CaptureState.STARTED) {
+            mIsMuted = mute;
+            mStreamerGL.setSilence(mIsMuted);
+        }
+    }
+
     @Override
     public void onVideoCaptureStateChanged(Streamer.CaptureState state) {
         android.util.Log.e(TAG, "onVideoCaptureStateChanged, state=" + state);
@@ -413,14 +430,16 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 result.success(data);
                 break;
             case "stopAudioCapture":
-                mStreamerGL.stopAudioCapture();
-                result.success("true");
+                mute(true);
+                Map<String, Object> dataAudioStop = new HashMap<>();
+                dataAudioStop.put("mute", mIsMuted);
+                result.success(dataAudioStop);
                 break;
             case "startAudioCapture":
-                Log.e("LARIX_METHOD_CHANNEL","inicio teste startAudioCapture");
-                mStreamerGL.startAudioCapture();
-                Log.e("LARIX_METHOD_CHANNEL","fim teste startAudioCapture");
-                result.success("true");
+                mute(false);
+                Map<String, Object> dataAudioStart = new HashMap<>();
+                dataAudioStart.put("mute", mIsMuted);
+                result.success(dataAudioStart);
                 break;
             case "stopVideoCapture":
                 Log.e("LARIX_METHOD_CHANNEL","inicio teste stopVideoCapture");

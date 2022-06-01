@@ -47,7 +47,9 @@ class TesteAndroid extends StatefulWidget {
 
 class _TesteAndroidState extends State<TesteAndroid> {
   FlutterLarixController? controller;
-  bool microfone = true;
+  bool isMute = false;
+  bool camera = true;
+  bool flash = false;
   int cameraSelected = 0;
 
   bool get isStreaming => controller?.getStreamStatus() == STREAM_STATUS.ON;
@@ -64,7 +66,7 @@ class _TesteAndroidState extends State<TesteAndroid> {
       children: [
         Container(
           width: double.infinity,
-          // constraints: const BoxConstraints(maxHeight: 100),
+          constraints: const BoxConstraints(maxHeight: 600),
           color: Colors.blueAccent,
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -73,7 +75,7 @@ class _TesteAndroidState extends State<TesteAndroid> {
                 cameraHeight: constraints.maxHeight.toInt(),
                 cameraType: CAMERA_TYPE.BACK,
                 rtmpUrl:
-                    "rtmp://origin-v2.vewbie.com:1935/origin/2b866520-11c5-4818-9d2a-6cfdebbb8c8a",
+                    "rtmp://origin-v2.vewbie.com:1935/origin/9143dd3b-6f9a-4696-97cb-43c4f78fa43f",
                 onCameraViewCreated: onCameraViewCreated,
                 listener: _flutterLarixListener,
               );
@@ -90,16 +92,14 @@ class _TesteAndroidState extends State<TesteAndroid> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     GestureDetector(
-                      child: this.microfone
-                          ? Icon(Icons.mic_rounded)
-                          : Icon(Icons.mic_off_sharp),
+                      child: this.isMute
+                          ? Icon(Icons.mic_off_sharp)
+                          : Icon(Icons.mic_rounded),
                       onTap: () async {
-                        if (!this.microfone) {
-                          await controller!.startAudioCapture();
-                          this.microfone = true;
-                        } else {
-                          await controller!.stopAudioCapture();
-                          this.microfone = false;
+                        if (isMute) {
+                          this.isMute = await controller!.startAudioCapture();
+                        } else if (!this.isMute) {
+                          this.isMute = await controller!.stopAudioCapture();
                         }
                         setState(() {});
                       },
