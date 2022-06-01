@@ -48,8 +48,6 @@ class TesteAndroid extends StatefulWidget {
 class _TesteAndroidState extends State<TesteAndroid> {
   FlutterLarixController? controller;
   bool microfone = true;
-  bool camera = true;
-  bool flash = false;
   int cameraSelected = 0;
 
   bool get isStreaming => controller?.getStreamStatus() == STREAM_STATUS.ON;
@@ -110,34 +108,19 @@ class _TesteAndroidState extends State<TesteAndroid> {
                       controller: controller!,
                     ),
                     GestureDetector(
-                      child: Icon(Icons.flip_camera_ios_rounded),
+                      child: const Icon(Icons.flip_camera_ios_rounded),
                       onTap: () async {
                         await controller!.setFlip();
-                        // print("camera");
-                        // bool microfone = true;
-                        // bool camera = true;
-                        // int cameraSelected = 0;
-                        // await controller!.startVideoCapture();
-                        //
-                        // await controller!.stopVideoCapture();
                         setState(() {});
                       },
                     ),
                     GestureDetector(
-                      child: this.flash
-                          ? Icon(Icons.flash_off)
-                          : Icon(Icons.flash_on),
+                      child: controller?.getTorchIsOn() == false
+                          ? const Icon(Icons.flash_off)
+                          : const Icon(Icons.flash_on),
                       onTap: () async {
-                        // if (this.flash) {
-                        //   await controller!.startAudioCapture();
-                        //   this.flash = true;
-                        // } else {
-                        // await controller!.stopAudioCapture();
-                        // this.flash = false;
-                        // }
-                        // setState(() {
-                        //
-                        // });
+                        await controller!.toggleTorch();
+                        setState(() {});
                       },
                     ),
                     // GestureDetector(

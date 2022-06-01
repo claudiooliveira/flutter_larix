@@ -438,6 +438,10 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 mStreamerGL.setDisplayRotation(1);
                 result.success("true");
                 break;
+            case "toggleTorch":
+                mStreamerGL.toggleTorch();
+                result.success(mStreamerGL.isTorchOn() ? "true" : "false");
+                break;
 //            case "getActiveCameraId":
 //                mStreamerGL.getActiveCameraId();
 //                break;

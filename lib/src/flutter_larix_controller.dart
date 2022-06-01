@@ -14,6 +14,7 @@ class FlutterLarixController {
 
   STREAM_STATUS _streamStatus = STREAM_STATUS.OFF;
   String _connectionState = "";
+  bool _torchIsOn = false;
 
   FlutterLarixControllerOptions options;
 
@@ -56,6 +57,10 @@ class FlutterLarixController {
     await _channel.invokeMethod('startVideoCapture');
   }
 
+  Future<void> stopVideoCapture() async {
+    await _channel.invokeMethod('stopVideoCapture');
+  }
+
   Future<void> setDisplayRotation() async {
     await _channel.invokeMethod('setDisplayRotation');
   }
@@ -64,8 +69,9 @@ class FlutterLarixController {
     await _channel.invokeMethod('flip');
   }
 
-  Future<void> stopVideoCapture() async {
-    await _channel.invokeMethod('stopVideoCapture');
+  Future<void> toggleTorch() async {
+    var result = await _channel.invokeMethod('toggleTorch');
+    _torchIsOn = result == "true";
   }
 
   STREAM_STATUS getStreamStatus() {
@@ -74,6 +80,10 @@ class FlutterLarixController {
 
   String getConnectionState() {
     return _connectionState;
+  }
+
+  bool getTorchIsOn() {
+    return _torchIsOn;
   }
 
   void _onStreamChanged(dynamic arguments) {
