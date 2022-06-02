@@ -22,6 +22,36 @@ class _StreamState extends State<Stream> {
   }
 
   @override
+  initState() {
+    super.initState();
+  }
+
+  @override
+  dispose() {
+    controller?.disposeCamera();
+    super.dispose();
+  }
+
+  void onCameraViewCreated(FlutterLarixController controller) async {
+    setState(() {
+      this.controller = controller;
+      initialCamera();
+    });
+  }
+
+  initialCamera() async {
+    var per = await controller!.getPermissions();
+    if (per.hasAudioPermission && per.hasCameraPermission) {
+      var teste = await controller!.initCamera();
+      print("teste oq veio na camera ${teste}");
+    } else {
+      print("vai perguntar algo ? ");
+      var teste = await controller!.requestPermissions();
+      print("oque ele respondeu das permissões ${teste}");
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -48,6 +78,16 @@ class _StreamState extends State<Stream> {
                   );
                 },
               ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.topRight,
+            child: GestureDetector(
+              child: Icon(Icons.back_hand_rounded, color: Colors.red[50]),
+              onTap: () {
+                controller!.requestPermissions();
+                // Navigator.pop(context);
+              },
             ),
           ),
           if (controller != null)
@@ -146,11 +186,5 @@ class _StreamState extends State<Stream> {
         ],
       ),
     );
-  }
-
-  void onCameraViewCreated(FlutterLarixController controller) async {
-    setState(() {
-      this.controller = controller;
-    });
   }
 }

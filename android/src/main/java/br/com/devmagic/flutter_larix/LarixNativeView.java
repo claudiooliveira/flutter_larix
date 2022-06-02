@@ -1,6 +1,8 @@
 package br.com.devmagic.flutter_larix;
 
 import android.app.ActionBar;
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.app.Activity;
 import android.app.Application;
 import android.app.FragmentManager;
@@ -12,7 +14,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.OrientationEventListener;
 import android.view.SurfaceHolder;
@@ -26,6 +27,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
 
 import com.wmspanel.libstream.AudioConfig;
 import com.wmspanel.libstream.CameraConfig;
@@ -39,6 +41,8 @@ import org.json.JSONObject;
 
 import br.com.devmagic.flutter_larix.camera.CameraInfo;
 import br.com.devmagic.flutter_larix.camera.CameraListHelper;
+import br.com.devmagic.flutter_larix.camera.CameraPermissions;
+import br.com.devmagic.flutter_larix.camera.CameraPermissions.PermissionsRegistry;
 import br.com.devmagic.flutter_larix.camera.CameraRegistry;
 import br.com.devmagic.flutter_larix.camera.CameraSettings;
 import io.flutter.Log;
@@ -56,8 +60,15 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     @NonNull private final LinearLayout container;
 
     private static final String TAG = "StreamerFragment";
-    private StreamerGL mStreamerGL;
 
+    private static final int REQUEST_LAUNCHV21 = 0;
+    private static final String[] PERMISSION_LAUNCHV21 = new String[] {"android.permission.CAMERA","android.permission.RECORD_AUDIO","android.permission.WRITE_EXTERNAL_STORAGE"};
+    private static final int REQUEST_LAUNCHV29 = 1;
+    private static final String[] PERMISSION_LAUNCHV29 = new String[] {"android.permission.CAMERA","android.permission.RECORD_AUDIO"};
+
+    private StreamerGL mStreamerGL;
+    private final PermissionsRegistry permissionsRegistry;
+    private final CameraPermissions cameraPermissions;
     private List<CameraInfo> cameraList;
     private CameraInfo activeCameraInfo;
     private String mCameraId;
@@ -73,9 +84,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     private SurfaceView mSurfaceView;
     private SurfaceHolder mHolder;
-    private Button btnFlipCamera;
-    private OrientationEventListener orientationEventListener;
-    int currentOrientation = 0;
     @NonNull
     StreamerGLBuilder builder;
     int connectionId = 0;
@@ -85,9 +93,11 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     private MethodChannel methodChannel;
 
-    LarixNativeView(BinaryMessenger messenger, Activity activity, @NonNull Context context, int id, @Nullable Map<String, Object> creationParams) {
+    LarixNativeView(BinaryMessenger messenger, PermissionsRegistry permissionsAdder, CameraPermissions cameraPermissions ,Activity activity, @NonNull Context context, int id, @Nullable Map<String, Object> creationParams) {
         mContext = context;
         this.activity = activity;
+        this.cameraPermissions = cameraPermissions;
+        this.permissionsRegistry = permissionsAdder;
         mCameraId = "0";
         mHandler = new Handler(Looper.getMainLooper());
         mSize = new Streamer.Size(1280, 720);
@@ -98,6 +108,12 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         methodChannel = new MethodChannel(messenger, "br.com.devmagic.flutter_larix/nativeview_" + id);
         methodChannel.setMethodCallHandler(this);
 
+        cameraPermissions.requestPermissions(
+                activity,
+                permissionsRegistry,
+                (String errCode, String errDesc) -> {
+                    Log.e("LARIX_METHOD_CHANNEL", "Call >>>>>>> " + errCode +" error"+  errDesc);
+                });
         int textViewId = View.generateViewId();
         int frameLayoutId = View.generateViewId();
 
@@ -162,8 +178,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
             }
 
             mHolder = holder;
+//            launchWithPermissionCheck();
             // We got surface to draw on, start streamer creation
-            createStreamer();
+
             SimpleOrientationListener mOrientationListener = null;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                 mOrientationListener = new SimpleOrientationListener(
@@ -171,11 +188,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
                     @Override
                     public void onSimpleOrientationChanged(int orientation) {
-                        if(orientation == Configuration.ORIENTATION_LANDSCAPE){
-                            android.util.Log.e("ORIENTATION", "SALVE ORIENTATION_LANDSCAPE");
+                        if(orientation == Configuration.ORIENTATION_LANDSCAPE && mStreamerGL != null){
                             mStreamerGL.setVideoOrientation(StreamerGL.Orientations.LANDSCAPE);
-                        }else if(orientation == Configuration.ORIENTATION_PORTRAIT){
-                            android.util.Log.e("ORIENTATION", "SALVE ORIENTATION_PORTRAIT");
+                        }else if(orientation == Configuration.ORIENTATION_PORTRAIT && mStreamerGL != null){
                             mStreamerGL.setVideoOrientation(StreamerGL.Orientations.PORTRAIT);
                         }
                         //mStreamerGL.flip();
@@ -207,6 +222,68 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
             }
         }
     };
+
+    private HashMap<String, Boolean> checkPermissions() {
+        HashMap<String, Boolean> permissions = new HashMap<String, Boolean>();
+        permissions.put("cameraAllowed", ContextCompat.checkSelfPermission(
+                mContext,
+                Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED);
+
+        permissions.put("audioAllowed", ContextCompat.checkSelfPermission(
+                mContext,
+                Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_GRANTED);
+        return permissions;
+    }
+
+    private void launchWithPermissionCheck() {
+//        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+//            LaunchActivityPermissionsDispatcher.launchV21WithPermissionCheck(this);
+//        } else {
+//            LaunchActivityPermissionsDispatcher.launchV29WithPermissionCheck(this);
+//        }
+//        HashMap<String, Boolean> permission = checkPermissions();
+//         if (!permission.get("cameraAllowed") || !permission.get("audioAllowed")) {
+//             String[] permissions = new String[2];
+//             int n = 0;
+//             if (!permission.get("cameraAllowed")) {
+//                 permissions[n++] = Manifest.permission.CAMERA;
+//             }
+//             if (!permission.get("audioAllowed")) {
+//                 permissions[n] = Manifest.permission.RECORD_AUDIO;
+//             }
+//             ActivityCompat.requestPermissions(
+//                     activity,
+//                     permissions,
+//                     REQUEST_LAUNCHV21
+//             );
+//         }
+    }
+
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        android.util.Log.v("kkk", "teste oque esta viendo no bangue");
+//
+//        if (requestCode == REQUEST_LAUNCHV21) {
+//            for (int result : grantResults) {
+//                android.util.Log.v("kkk", "teste oque esta viendo no bangue" + result);
+//
+//                if (result == PackageManager.PERMISSION_DENIED) {
+//                    android.util.Log.v("kkk", "teste oque esta viendo deu ruim" + result);
+//
+//                    return;
+//                }
+//                else if (result == PackageManager.PERMISSION_GRANTED) {
+//                    android.util.Log.v("kkk", "teste oque esta viendo deu bom" + result);
+//                    createStreamer();
+//
+//                }
+//            }
+//        }
+//    }
+
 
     private void createStreamer() {
         android.util.Log.v(TAG, "createStreamer()");
@@ -408,7 +485,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 result.success("true");
                 break;
             case "stopStream":
-                Log.e("STOP_CONNECTION", "ID: " + connectionId);
                 mStreamerGL.releaseConnection(connectionId);
                 break;
             case "flip":
@@ -439,15 +515,11 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 result.success(dataAudioStart);
                 break;
             case "stopVideoCapture":
-                Log.e("LARIX_METHOD_CHANNEL","inicio teste stopVideoCapture");
                 mStreamerGL.stopVideoCapture();
-                Log.e("LARIX_METHOD_CHANNEL","fim teste stopVideoCapture");
                 result.success("true");
                 break;
             case "startVideoCapture":
-                Log.e("LARIX_METHOD_CHANNEL","inicio teste startVideoCapture");
                 mStreamerGL.startVideoCapture();
-                Log.e("LARIX_METHOD_CHANNEL","fim teste startVideoCapture");
                 result.success("true");
                 break;
             case "setDisplayRotation":
@@ -458,9 +530,44 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 mStreamerGL.toggleTorch();
                 result.success(mStreamerGL.isTorchOn() ? "true" : "false");
                 break;
-//            case "getActiveCameraId":
-//                mStreamerGL.getActiveCameraId();
-//                break;
+            case "getPermissions":
+                Map<String, Boolean> permissions = new HashMap();
+                permissions.put("hasAudioPermission", cameraPermissions.hasAudioPermission(activity));
+                permissions.put("hasCameraPermission", cameraPermissions.hasCameraPermission(activity));
+                result.success(permissions);
+                break;
+            case "requestPermissions":
+                cameraPermissions.requestPermissions(
+                        activity,
+                        permissionsRegistry,
+                        (String errCode, String errDesc) -> {
+                            if (errCode == null) {
+                                try {
+                                    Map<String, String> reply = new HashMap();
+                                    reply.put("CameraAccess", "true");
+                                    result.success(reply);
+                                } catch (Exception e) {
+                                    result.error("CameraAccess", e.getMessage(), null);
+                                }
+                            } else {
+                                Log.e("LARIX_METHOD_CHANNEL", "Call >>>>>>> " + errCode +" error"+  errDesc);
+                                result.error(errCode, errDesc, null);
+                            }
+                        });
+                break;
+            case "initCamera":
+                HashMap<String, Boolean> permission = checkPermissions();
+                if (permission.get("cameraAllowed") && permission.get("audioAllowed")) {
+                    createStreamer();
+                    result.success("camera started");
+                } else {
+                    result.success("camera without permission");
+                }
+                break;
+            case "disposeCamera":
+                mStreamerGL.release();
+                mStreamerGL = null;
+                break;
             default:
                 result.notImplemented();
         }

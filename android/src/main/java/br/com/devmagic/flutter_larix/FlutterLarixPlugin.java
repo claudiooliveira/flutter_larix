@@ -35,7 +35,7 @@ public class FlutterLarixPlugin implements FlutterPlugin, ActivityAware {
     activity = activityPluginBinding.getActivity();
     flutterPluginBinding.getPlatformViewRegistry().registerViewFactory(
             VIEW_TYPE_ID,
-            new LarixNativeViewFactory(flutterPluginBinding.getBinaryMessenger(), activity));
+            new LarixNativeViewFactory(flutterPluginBinding.getBinaryMessenger(), activityPluginBinding::addRequestPermissionsResultListener, activity));
   }
 
   @Override

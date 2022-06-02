@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_larix/src/defs/permissions.dart';
 import 'package:flutter_larix/src/defs/stream_changed.dart';
 import 'package:flutter_larix/src/flutter_larix_controller_options.dart';
 
@@ -34,8 +35,24 @@ class FlutterLarixController {
     });
   }
 
-  void dispose() {
-    stopStream();
+  Future<String> initCamera() async {
+    return await _channel.invokeMethod('initCamera');
+  }
+
+  Future<void> disposeCamera() async {
+    await _channel.invokeMethod('disposeCamera');
+  }
+
+  Future<Map<String, String>> requestPermissions() async {
+    return await _channel.invokeMethod('requestPermissions');
+  }
+
+  Future<Permissions> getPermissions() async {
+    return Permissions.fromJson(
+      HashMap.from(
+        await _channel.invokeMethod('getPermissions'),
+      ),
+    );
   }
 
   Future<void> startStream() async {
