@@ -46,8 +46,10 @@ class _StreamState extends State<Stream> {
       print("teste oq veio na camera ${teste}");
     } else {
       print("vai perguntar algo ? ");
-      var teste = await controller!.requestPermissions();
-      print("oque ele respondeu das permissões ${teste}");
+      var permissionsResult = await controller!.requestPermissions();
+      if (permissionsResult.hasCameraPermission) {
+        controller!.initCamera();
+      }
     }
   }
 

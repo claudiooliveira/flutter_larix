@@ -107,13 +107,13 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
         methodChannel = new MethodChannel(messenger, "br.com.devmagic.flutter_larix/nativeview_" + id);
         methodChannel.setMethodCallHandler(this);
-
-        cameraPermissions.requestPermissions(
-                activity,
-                permissionsRegistry,
-                (String errCode, String errDesc) -> {
-                    Log.e("LARIX_METHOD_CHANNEL", "Call >>>>>>> " + errCode +" error"+  errDesc);
-                });
+//
+//        cameraPermissions.requestPermissions(
+//                activity,
+//                permissionsRegistry,
+//                (String errCode, String errDesc) -> {
+//                    Log.e("LARIX_METHOD_CHANNEL", "Call >>>>>>> " + errCode +" error"+  errDesc);
+//                });
         int textViewId = View.generateViewId();
         int frameLayoutId = View.generateViewId();
 
@@ -543,8 +543,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                         (String errCode, String errDesc) -> {
                             if (errCode == null) {
                                 try {
-                                    Map<String, String> reply = new HashMap();
-                                    reply.put("CameraAccess", "true");
+                                    Map<String, Boolean> reply = new HashMap();
+                                    reply.put("hasCameraPermission", true);
+                                    reply.put("hasAudioPermission", true);
                                     result.success(reply);
                                 } catch (Exception e) {
                                     result.error("CameraAccess", e.getMessage(), null);

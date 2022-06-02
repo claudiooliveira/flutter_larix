@@ -81,7 +81,7 @@ public class CameraPermissions {
 
         @Override
         public boolean onRequestPermissionsResult(int id, String[] permissions, int[] grantResults) {
-            if (alreadyCalled || id != CAMERA_REQUEST_ID) {
+            if (alreadyCalled || id != CAMERA_REQUEST_ID || grantResults.length <= 0) {
                 return false;
             }
 

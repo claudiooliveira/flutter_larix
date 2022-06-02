@@ -43,8 +43,9 @@ class FlutterLarixController {
     await _channel.invokeMethod('disposeCamera');
   }
 
-  Future<Map<String, String>> requestPermissions() async {
-    return await _channel.invokeMethod('requestPermissions');
+  Future<Permissions> requestPermissions() async {
+    var result = await _channel.invokeMethod('requestPermissions');
+    return Permissions.fromJson(HashMap.from(result));
   }
 
   Future<Permissions> getPermissions() async {
