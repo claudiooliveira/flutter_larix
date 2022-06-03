@@ -87,8 +87,7 @@ class _StreamState extends State<Stream> {
             child: GestureDetector(
               child: Icon(Icons.back_hand_rounded, color: Colors.red[50]),
               onTap: () {
-                controller!.requestPermissions();
-                // Navigator.pop(context);
+                Navigator.pop(context);
               },
             ),
           ),

@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">BackgroundCamera</string>
+    <string name="btn_start_caption">Start</string>
+    <string name="btn_stop_caption">Stop</string>
+    <string name="btn_open_caption">Open</string>
+    <string name="btn_close_caption">Close</string>
+    <string name="camera_running">Camera running</string>
+    <string-array name="video_resolution">
+        <item>1920x1080</item>
+        <item>1280x720</item>
+        <item>720x480</item>
+        <item>320x240</item>
+        <item>3840x2160</item>
+        <item>720x576</item>
+        <item>640x480</item>
+        <item>352x288</item>
+        <item>176x144</item>
+        <item>640x360</item>
+        <item>720x405</item>
+        <item>864x486</item>
+        <item>960x540</item>
+        <item>4096x2160</item>
+        <item>1920x1200</item>
+    </string-array>
+</resources>
