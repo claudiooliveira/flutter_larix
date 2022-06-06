@@ -16,14 +16,14 @@ class FlutterLarix extends StatefulWidget {
   int cameraWidth = 0;
   int cameraHeight = 0;
   CAMERA_TYPE cameraType;
-  String rtmpUrl = "";
+  String url = "";
   final FlutterLarixCameraViewCreatedCallback onCameraViewCreated;
   final Function listener;
   FlutterLarix({
     Key? key,
     required this.cameraWidth,
     required this.cameraHeight,
-    required this.rtmpUrl,
+    required this.url,
     required this.cameraType,
     required this.onCameraViewCreated,
     required this.listener,
@@ -43,7 +43,7 @@ class _FlutterLarixState extends State<FlutterLarix> {
       "width": widget.cameraWidth,
       "height": widget.cameraHeight,
       "type": widget.cameraType.name,
-      "url": widget.rtmpUrl,
+      "url": widget.url,
     };
 
     return AndroidView(
@@ -62,7 +62,7 @@ class _FlutterLarixState extends State<FlutterLarix> {
         cameraWidth: widget.cameraWidth,
         cameraHeight: widget.cameraHeight,
         cameraType: widget.cameraType,
-        url: widget.rtmpUrl,
+        url: widget.url,
       ),
     );
     widget.onCameraViewCreated(_controller!);

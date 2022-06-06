@@ -56,31 +56,36 @@ class _StreamState extends State<Stream> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Teste flutter larix"),
-      ),
+      // appBar: AppBar(
+      //   title: const Text("Teste flutter larix"),
+      // ),
       body: Stack(
         children: [
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: double.infinity,
-              // constraints: const BoxConstraints(maxHeight: 300),
-              color: Colors.blueAccent,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return FlutterLarix(
-                    cameraWidth: constraints.maxWidth.toInt(),
-                    cameraHeight: constraints.maxHeight.toInt(),
-                    cameraType: CAMERA_TYPE.BACK,
-                    rtmpUrl:
-                        "rtmp://origin-v2.vewbie.com:1935/origin/9143dd3b-6f9a-4696-97cb-43c4f78fa43f",
-                    onCameraViewCreated: onCameraViewCreated,
-                    listener: _flutterLarixListener,
-                  );
-                },
-              ),
-            ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: constraints.maxWidth,
+                  maxHeight: constraints.maxHeight,
+                ),
+                child: Center(
+                  child: Container(
+                    width: 2000,
+                    height: constraints.maxHeight,
+                    color: Colors.blueAccent,
+                    child: FlutterLarix(
+                      cameraWidth: constraints.maxWidth.toInt(),
+                      cameraHeight: constraints.maxHeight.toInt(),
+                      cameraType: CAMERA_TYPE.BACK,
+                      url:
+                          "rtmp://origin-v2.vewbie.com:1935/origin/9143dd3b-6f9a-4696-97cb-43c4f78fa43f",
+                      onCameraViewCreated: onCameraViewCreated,
+                      listener: _flutterLarixListener,
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
           Align(
             alignment: Alignment.topRight,

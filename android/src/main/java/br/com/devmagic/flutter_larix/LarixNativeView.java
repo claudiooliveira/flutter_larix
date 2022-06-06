@@ -95,75 +95,44 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     LarixNativeView(BinaryMessenger messenger, PermissionsRegistry permissionsAdder, CameraPermissions cameraPermissions ,Activity activity, @NonNull Context context, int id, @Nullable Map<String, Object> creationParams) {
         mContext = context;
+
         this.activity = activity;
         this.cameraPermissions = cameraPermissions;
         this.permissionsRegistry = permissionsAdder;
+
         mCameraId = "0";
+
         mHandler = new Handler(Looper.getMainLooper());
+        int width = Integer.parseInt(creationParams.get("width").toString());
+        int height = Integer.parseInt(creationParams.get("height").toString());
+        String cameraType = creationParams.get("type").toString();
+
+        switch (cameraType) {
+            case "BACK":
+                mCameraId = "0";
+                break;
+            case "FRONT":
+                mCameraId = "1";
+                break;
+        }
+
+        Log.e("LARIX_API", "WIDTH: " + width + "; HEIGHT: " + height);
         mSize = new Streamer.Size(1280, 720);
         mUri = creationParams.get("url").toString();
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
         container = new LinearLayout(context);
         container.setOrientation(LinearLayout.VERTICAL);
+        container.setLayoutParams(layoutParams);
 
         methodChannel = new MethodChannel(messenger, "br.com.devmagic.flutter_larix/nativeview_" + id);
         methodChannel.setMethodCallHandler(this);
-//
-//        cameraPermissions.requestPermissions(
-//                activity,
-//                permissionsRegistry,
-//                (String errCode, String errDesc) -> {
-//                    Log.e("LARIX_METHOD_CHANNEL", "Call >>>>>>> " + errCode +" error"+  errDesc);
-//                });
-        int textViewId = View.generateViewId();
-        int frameLayoutId = View.generateViewId();
-
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
-
-        TextView textView = new TextView(context);
-        textView.setId(textViewId);
-        textView.setTextSize(22);
-        textView.setBackgroundColor(Color.rgb(255, 255, 255));
-        textView.setText("Rendered on a native Android view (id: " + id + ")");
-
-        FrameLayout frameLayout = new FrameLayout(context);
-        frameLayout.setId(frameLayoutId);
-        frameLayout.setLayoutParams(layoutParams);
-        frameLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.design_default_color_error));
-
-        //container.addView(view);
-//        container.addView(textView);
-//        container.addView(frameLayout);
 
         ViewGroup root = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.afl_surface, container, true);
 
         mPreviewFrame = root.findViewById(R.id.preview_afl);
-        //btnFlipCamera = root.findViewById(R.id.btnFlipCamera);
-
         mSurfaceView = root.findViewById(R.id.surface_view);
         mSurfaceView.getHolder().addCallback(mPreviewHolderCallback);
-
-        //LayoutInflater.from(activity).inflate(R.layout.activity_main, this.container);
-
-        //activity.addContentView(container, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-
-        Log.e("LARIX_API", "View id " + textViewId + " this id: " + id);
-        Log.e("LARIX_API", "Activity details: " + activity.getTaskId());
-        Log.e("LARIX_API", "Context details: " + activity.getTaskId());
-
-//        new Handler(Looper.getMainLooper()).postDelayed(
-//                new Runnable() {
-//                    public void run() {
-//                        FragmentManager fm = activity.getFragmentManager();
-//                        fm.beginTransaction()
-//                                .replace(frameLayoutId, StreamerFragment.newInstance(
-//                                        "0",
-//                                        1280, 720,
-//                                        "rtmp://origin-v2.vewbie.com:1935/origin/2b866520-11c5-4818-9d2a-6cfdebbb8c8a"))
-//                                .commit();
-//                    }
-//                },
-//                1000);
 
     }
 
