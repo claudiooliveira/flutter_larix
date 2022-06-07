@@ -1,6 +1,5 @@
 package br.com.devmagic.flutter_larix;
 
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -9,8 +8,16 @@ import android.widget.FrameLayout;
 /**
  * Layout that adjusts to maintain a specific aspect ratio.
  */
-public final class AspectFrameLayout extends FrameLayout {
+public class AspectFrameLayout extends FrameLayout {
     private static final String TAG = "AFL";
+
+    public enum ResizeMode {
+        FIT_ASPECT,   //Fit preserving aspect ratio with black stripes around
+        FILL_ASPECT,  //Fill preserving aspect ratio with cropping extra size
+        FILL          //Stretch content ignoring aspect ratio (acts like regular FrameLayout)
+    };
+
+    protected ResizeMode mResizeMode = ResizeMode.FIT_ASPECT;
 
     private double mTargetAspect = -1.0;        // initially use default window size
 
@@ -29,19 +36,25 @@ public final class AspectFrameLayout extends FrameLayout {
         if (aspectRatio < 0) {
             throw new IllegalArgumentException();
         }
-        Log.d(TAG, "Setting aspect ratio to " + aspectRatio + " (was " + mTargetAspect + ")");
         if (mTargetAspect != aspectRatio) {
             mTargetAspect = aspectRatio;
             requestLayout();
         }
     }
 
+    public void setResizeMode(ResizeMode mode) {
+        if (mResizeMode != mode) {
+            mResizeMode = mode;
+            requestLayout();
+        }
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        Log.d(TAG, "onMeasure target=" + mTargetAspect +
-                " width=[" + MeasureSpec.toString(widthMeasureSpec) +
-                "] height=[" + MeasureSpec.toString(heightMeasureSpec) + "]");
-
+        if (mResizeMode == ResizeMode.FILL) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            return;
+        }
         // Target aspect ratio will be < 0 if it hasn't been set yet.  In that case,
         // we just use whatever we've been handed.
         if (mTargetAspect > 0) {
@@ -57,12 +70,14 @@ public final class AspectFrameLayout extends FrameLayout {
             double viewAspectRatio = (double) initialWidth / initialHeight;
             double aspectDiff = mTargetAspect / viewAspectRatio - 1;
 
+            if (mResizeMode == ResizeMode.FILL_ASPECT) {
+                aspectDiff = -aspectDiff;
+            }
+
             if (Math.abs(aspectDiff) < 0.01) {
                 // We're very close already.  We don't want to risk switching from e.g. non-scaled
                 // 1280x720 to scaled 1280x719 because of some floating-point round-off error,
                 // so if we're really close just leave it alone.
-                Log.d(TAG, "aspect ratio is good (target=" + mTargetAspect +
-                        ", view=" + initialWidth + "x" + initialHeight + ")");
             } else {
                 if (aspectDiff > 0) {
                     // limited by narrow width; restrict height
@@ -71,8 +86,6 @@ public final class AspectFrameLayout extends FrameLayout {
                     // limited by short height; restrict width
                     initialWidth = (int) (initialHeight * mTargetAspect);
                 }
-                Log.d(TAG, "new size=" + initialWidth + "x" + initialHeight + " + padding " +
-                        horizPadding + "x" + vertPadding);
                 initialWidth += horizPadding;
                 initialHeight += vertPadding;
                 widthMeasureSpec = MeasureSpec.makeMeasureSpec(initialWidth, MeasureSpec.EXACTLY);
@@ -80,8 +93,6 @@ public final class AspectFrameLayout extends FrameLayout {
             }
         }
 
-        Log.d(TAG, "set width=[" + MeasureSpec.toString(widthMeasureSpec) +
-                "] height=[" + MeasureSpec.toString(heightMeasureSpec) + "]");
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 }
