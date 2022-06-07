@@ -22,10 +22,8 @@ class LarixNativeViewFactory extends PlatformViewFactory {
     private final BinaryMessenger messenger;
 
     LarixNativeViewFactory(@NonNull BinaryMessenger messenger, CameraPermissions.PermissionsRegistry permissionsRegistry, Activity activity) {
-        //NativeViewFactory() {
         super(StandardMessageCodec.INSTANCE);
         this.permissionsRegistry = permissionsRegistry;
-        Log.e("LARIX_API", "create native factory");
         act = activity;
         this.messenger = messenger;
     }
@@ -33,7 +31,6 @@ class LarixNativeViewFactory extends PlatformViewFactory {
     @NonNull
     @Override
     public PlatformView create(@NonNull Context context, int id, @Nullable Object args) {
-        Log.e("LARIX_API", "bora??");
         final Map<String, Object> creationParams = (Map<String, Object>) args;
         return new LarixNativeView(messenger, permissionsRegistry,new CameraPermissions(), act, context, id, creationParams);
     }

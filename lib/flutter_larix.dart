@@ -11,7 +11,7 @@ typedef FlutterLarixCameraViewCreatedCallback = void Function(
 
 enum CAMERA_TYPE { FRONT, BACK }
 
-enum CAMERA_RESOLUTION { SD, HD, FULLHD, UHD }
+enum CAMERA_RESOLUTION { SD, HD, FULLHD }
 
 // ignore: must_be_immutable
 class FlutterLarix extends StatefulWidget {

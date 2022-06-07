@@ -96,8 +96,8 @@ class FlutterLarixController {
     await _channel.invokeMethod('setDisplayRotation');
   }
 
-  Future<void> setFlip() async {
-    await _channel.invokeMethod('flip');
+  Future<void> flipCamera() async {
+    await _channel.invokeMethod('flipCamera');
   }
 
   Future<void> toggleTorch() async {

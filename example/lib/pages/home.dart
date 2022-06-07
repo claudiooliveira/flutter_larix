@@ -13,7 +13,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Teste flutter larix"),
+        title: const Text("Flutter Larix Example"),
       ),
       body: Center(
         child: TextButton(

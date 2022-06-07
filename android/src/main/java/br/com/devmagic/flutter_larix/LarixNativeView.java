@@ -126,8 +126,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 return new Streamer.Size(720, 480);
             case "FULLHD":
                 return new Streamer.Size(1920, 1080);
-            case "UHD":
-                return new Streamer.Size(3840, 2160);
             default:
                 return new Streamer.Size(1280, 720);
         }
@@ -136,15 +134,12 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     private final SurfaceHolder.Callback mPreviewHolderCallback = new SurfaceHolder.Callback() {
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
-            android.util.Log.v(TAG, "surfaceCreated()");
 
             if (mHolder != null) {
-                android.util.Log.e(TAG, "SurfaceHolder already exists"); // should never happens
                 return;
             }
 
             mHolder = holder;
-//            launchWithPermissionCheck();
             // We got surface to draw on, start streamer creation
 
             SimpleOrientationListener mOrientationListener = null;
@@ -159,7 +154,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                         }else if(orientation == Configuration.ORIENTATION_PORTRAIT && mStreamerGL != null){
                             mStreamerGL.setVideoOrientation(StreamerGL.Orientations.PORTRAIT);
                         }
-                        //mStreamerGL.flip();
                     }
                 };
             }
@@ -168,7 +162,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-            android.util.Log.v(TAG, "surfaceChanged() " + width + "x" + height);
             if (mStreamerGL != null) {
                 mStreamerGL.setSurfaceSize(new Streamer.Size(width, height));
             }
@@ -176,7 +169,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
-            android.util.Log.v(TAG, "surfaceDestroyed()");
             mHolder = null;
             releaseStreamer();
         }
@@ -203,56 +195,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         return permissions;
     }
 
-    private void launchWithPermissionCheck() {
-//        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-//            LaunchActivityPermissionsDispatcher.launchV21WithPermissionCheck(this);
-//        } else {
-//            LaunchActivityPermissionsDispatcher.launchV29WithPermissionCheck(this);
-//        }
-//        HashMap<String, Boolean> permission = checkPermissions();
-//         if (!permission.get("cameraAllowed") || !permission.get("audioAllowed")) {
-//             String[] permissions = new String[2];
-//             int n = 0;
-//             if (!permission.get("cameraAllowed")) {
-//                 permissions[n++] = Manifest.permission.CAMERA;
-//             }
-//             if (!permission.get("audioAllowed")) {
-//                 permissions[n] = Manifest.permission.RECORD_AUDIO;
-//             }
-//             ActivityCompat.requestPermissions(
-//                     activity,
-//                     permissions,
-//                     REQUEST_LAUNCHV21
-//             );
-//         }
-    }
-
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        android.util.Log.v("kkk", "teste oque esta viendo no bangue");
-//
-//        if (requestCode == REQUEST_LAUNCHV21) {
-//            for (int result : grantResults) {
-//                android.util.Log.v("kkk", "teste oque esta viendo no bangue" + result);
-//
-//                if (result == PackageManager.PERMISSION_DENIED) {
-//                    android.util.Log.v("kkk", "teste oque esta viendo deu ruim" + result);
-//
-//                    return;
-//                }
-//                else if (result == PackageManager.PERMISSION_GRANTED) {
-//                    android.util.Log.v("kkk", "teste oque esta viendo deu bom" + result);
-//                    createStreamer();
-//
-//                }
-//            }
-//        }
-//    }
-
-
     private void createStreamer() {
-        android.util.Log.v(TAG, "createStreamer()");
         if (mStreamerGL != null) {
             return;
         }
@@ -301,8 +244,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         }
 
         updatePreviewRatio(mPreviewFrame, mSize);
-
-
     }
 
     @NonNull
@@ -322,7 +263,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     }
 
     private int videoOrientation() {
-        android.util.Log.v("STREAM", "ORIENTATION? " + (isPortrait() ? "PORTRAIT" : "LANDSCAPE"));
         return isPortrait() ? StreamerGL.Orientations.PORTRAIT : StreamerGL.Orientations.LANDSCAPE;
     }
 
@@ -338,9 +278,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     @Override
     public void onAudioCaptureStateChanged(Streamer.CaptureState state) {
-        android.util.Log.d(TAG, "onAudioCaptureStateChanged, state=" + state);
         mAudioCaptureState = state;
-        //maybeCreateStream();
     }
 
     @Override
@@ -360,9 +298,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     @Override
     public void onConnectionStateChanged(int i, Streamer.ConnectionState connectionState, Streamer.Status status, JSONObject jsonObject) {
-
-        Log.e("LARIX_API", "connectionState >>>> " + connectionState.toString());
-
         Map<String, Object> data = new HashMap<>();
         data.put("connectionState", connectionState.name());
         methodChannel.invokeMethod("streamChanged", data);
@@ -373,7 +308,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         if (mStreamerGL != null
                 && mVideoCaptureState == Streamer.CaptureState.STARTED
                 && mAudioCaptureState == Streamer.CaptureState.STARTED) {
-            // audio+video encoding is running -> create stream
             ConnectionConfig conn = new ConnectionConfig();
             conn.uri = mUri;
             connectionId = mStreamerGL.createConnection(conn);
@@ -398,9 +332,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     @Override
     public void onVideoCaptureStateChanged(Streamer.CaptureState state) {
-        android.util.Log.e(TAG, "onVideoCaptureStateChanged, state=" + state);
         mVideoCaptureState = state;
-        //maybeCreateStream();
     }
 
     @Override
@@ -440,8 +372,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
-        Log.e("LARIX_METHOD_CHANNEL", "Call >>>>>>> " + call.method);
-        Log.e("LARIX_METHOD_CHANNEL", "ARGUMENTS >>>>>>> " + call.arguments);
 
         switch(call.method) {
             case "startStream":
@@ -453,7 +383,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
             case "stopStream":
                 mStreamerGL.releaseConnection(connectionId);
                 break;
-            case "flip":
+            case "flipCamera":
                 for (CameraInfo info : cameraList) {
                     if (!info.cameraId.contains(mCameraId)) {
                         activeCameraInfo = CameraSettings.getActiveCameraInfo(mContext, info.cameraId, cameraList);
@@ -517,7 +447,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                                     result.error("CameraAccess", e.getMessage(), null);
                                 }
                             } else {
-                                Log.e("LARIX_METHOD_CHANNEL", "Call >>>>>>> " + errCode +" error"+  errDesc);
                                 result.error(errCode, errDesc, null);
                             }
                         });
@@ -540,17 +469,4 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         }
 
     }
-
-//    @Override
-//    public void onDetected(List<Map<String, Object>> data) {
-//
-//        context.runOnUiThread(new Runnable() {
-//
-//            @Override
-//            public void run() {
-//
-//                methodChannel.invokeMethod("onDetected", data);
-//            }
-//        });
-//    }
 }

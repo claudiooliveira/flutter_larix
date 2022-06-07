@@ -7,7 +7,6 @@ buildscript {
         mavenCentral()
         flatDir {
             dirs project(':flutter_larix').file('libs')
-            // e.g. dirs project(':url_launcher').file('libs')  - don't miss the ':'
         }
                maven {
                    url "${project(':flutter_larix').projectDir}/libs"
@@ -15,7 +14,6 @@ buildscript {
     }
 
     dependencies {
-        //classpath 'com.android.tools.build:gradle:4.1.0'
         classpath 'com.android.tools.build:gradle:3.5.0'
     }
 }
@@ -52,10 +50,6 @@ android {
     }
 }
 dependencies {
-    //implementation(fileTree(dir: 'libs', include: ['*.aar']))
-//    implementation(files('libs/libstream-release.aar'))
-//    implementation(files('libs/libudpsender-release.aar'))
-
     implementation 'com.android.support:multidex:1.0.0'
     compileOnly files('libs/libstream-release.aar')
     compileOnly files('libs/libudpsender-release.aar')

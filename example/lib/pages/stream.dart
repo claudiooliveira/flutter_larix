@@ -12,7 +12,7 @@ class Stream extends StatefulWidget {
 
 class _StreamState extends State<Stream> {
   FlutterLarixController? controller;
-
+  String broadcastUrl = "<YOUR_STREAM_URL>";
   bool get isStreaming => controller?.getStreamStatus() == STREAM_STATUS.ON;
 
   void _flutterLarixListener() {
@@ -56,7 +56,7 @@ class _StreamState extends State<Stream> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Teste flutter larix"),
+        title: const Text("Flutter Larix Example"),
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -76,7 +76,7 @@ class _StreamState extends State<Stream> {
                     child: FlutterLarix(
                       cameraResolution: CAMERA_RESOLUTION.HD,
                       cameraType: CAMERA_TYPE.BACK,
-                      url: "",
+                      url: broadcastUrl,
                       onCameraViewCreated: onCameraViewCreated,
                       listener: _flutterLarixListener,
                     ),
@@ -131,7 +131,7 @@ class _StreamState extends State<Stream> {
                                         color: Colors.white,
                                       ),
                                       onTap: () async {
-                                        await controller!.setFlip();
+                                        await controller!.flipCamera();
                                         setState(() {});
                                       },
                                     ),
