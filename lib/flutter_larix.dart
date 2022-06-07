@@ -11,18 +11,18 @@ typedef FlutterLarixCameraViewCreatedCallback = void Function(
 
 enum CAMERA_TYPE { FRONT, BACK }
 
+enum CAMERA_RESOLUTION { SD, HD, FULLHD, UHD }
+
 // ignore: must_be_immutable
 class FlutterLarix extends StatefulWidget {
-  int cameraWidth = 0;
-  int cameraHeight = 0;
+  CAMERA_RESOLUTION cameraResolution = CAMERA_RESOLUTION.HD;
   CAMERA_TYPE cameraType;
   String url = "";
   final FlutterLarixCameraViewCreatedCallback onCameraViewCreated;
   final Function listener;
   FlutterLarix({
     Key? key,
-    required this.cameraWidth,
-    required this.cameraHeight,
+    required this.cameraResolution,
     required this.url,
     required this.cameraType,
     required this.onCameraViewCreated,
@@ -40,8 +40,7 @@ class _FlutterLarixState extends State<FlutterLarix> {
   Widget build(BuildContext context) {
     const String viewType = 'br.com.devmagic.flutter_larix/nativeview';
     final Map<String, dynamic> creationParams = <String, dynamic>{
-      "width": widget.cameraWidth,
-      "height": widget.cameraHeight,
+      "resolution": widget.cameraResolution.name,
       "type": widget.cameraType.name,
       "url": widget.url,
     };
@@ -59,9 +58,8 @@ class _FlutterLarixState extends State<FlutterLarix> {
       options: FlutterLarixControllerOptions(
         id: id,
         listener: widget.listener,
-        cameraWidth: widget.cameraWidth,
-        cameraHeight: widget.cameraHeight,
         cameraType: widget.cameraType,
+        cameraResolution: widget.cameraResolution,
         url: widget.url,
       ),
     );

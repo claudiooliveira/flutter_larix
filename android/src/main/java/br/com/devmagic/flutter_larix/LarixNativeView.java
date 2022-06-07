@@ -1,33 +1,26 @@
 package br.com.devmagic.flutter_larix;
 
-import android.app.ActionBar;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.app.Activity;
 import android.app.Application;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
-import android.view.OrientationEventListener;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-import androidx.core.app.ActivityCompat;
 
 import com.wmspanel.libstream.AudioConfig;
 import com.wmspanel.libstream.CameraConfig;
@@ -40,7 +33,6 @@ import com.wmspanel.libstream.VideoConfig;
 import org.json.JSONObject;
 
 import br.com.devmagic.flutter_larix.camera.CameraInfo;
-import br.com.devmagic.flutter_larix.camera.CameraListHelper;
 import br.com.devmagic.flutter_larix.camera.CameraPermissions;
 import br.com.devmagic.flutter_larix.camera.CameraPermissions.PermissionsRegistry;
 import br.com.devmagic.flutter_larix.camera.CameraRegistry;
@@ -51,7 +43,6 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.platform.PlatformView;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,11 +51,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     @NonNull private final LinearLayout container;
 
     private static final String TAG = "StreamerFragment";
-
-    private static final int REQUEST_LAUNCHV21 = 0;
-    private static final String[] PERMISSION_LAUNCHV21 = new String[] {"android.permission.CAMERA","android.permission.RECORD_AUDIO","android.permission.WRITE_EXTERNAL_STORAGE"};
-    private static final int REQUEST_LAUNCHV29 = 1;
-    private static final String[] PERMISSION_LAUNCHV29 = new String[] {"android.permission.CAMERA","android.permission.RECORD_AUDIO"};
 
     private StreamerGL mStreamerGL;
     private final PermissionsRegistry permissionsRegistry;
@@ -103,8 +89,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         mCameraId = "0";
 
         mHandler = new Handler(Looper.getMainLooper());
-        int width = Integer.parseInt(creationParams.get("width").toString());
-        int height = Integer.parseInt(creationParams.get("height").toString());
         String cameraType = creationParams.get("type").toString();
 
         switch (cameraType) {
@@ -116,11 +100,10 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 break;
         }
 
-        Log.e("LARIX_API", "WIDTH: " + width + "; HEIGHT: " + height);
-        mSize = new Streamer.Size(1280, 720);
+        mSize = getResolution(creationParams);
         mUri = creationParams.get("url").toString();
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
         container = new LinearLayout(context);
         container.setOrientation(LinearLayout.VERTICAL);
         container.setLayoutParams(layoutParams);
@@ -134,6 +117,20 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         mSurfaceView = root.findViewById(R.id.surface_view);
         mSurfaceView.getHolder().addCallback(mPreviewHolderCallback);
 
+    }
+
+    private Streamer.Size getResolution(Map creationParams) {
+        String resolution = creationParams.get("resolution").toString();
+        switch (resolution) {
+            case "SD":
+                return new Streamer.Size(720, 480);
+            case "FULLHD":
+                return new Streamer.Size(1920, 1080);
+            case "UHD":
+                return new Streamer.Size(3840, 2160);
+            default:
+                return new Streamer.Size(1280, 720);
+        }
     }
 
     private final SurfaceHolder.Callback mPreviewHolderCallback = new SurfaceHolder.Callback() {

@@ -38,10 +38,9 @@ In your widget you need to make a call to FlutterLarix passing in the property t
 
 ```
 FlutterLarix(
-    cameraWidth: 1280,
-    cameraHeight: 720,
+    cameraResolution: CAMERA_RESOLUTION.HD,
     cameraType: CAMERA_TYPE.BACK, // camera default
-    rtmpUrl: "rtmp://teste.com:1935/origin/AAAAA-bbb-cccc-dddd-111111111111", // 
+    url: "rtmp://teste.com:1935/origin/AAAAA-bbb-cccc-dddd-111111111111", // 
     onCameraViewCreated: onCameraViewCreated,
     listener: _flutterLarixListener,
 ),

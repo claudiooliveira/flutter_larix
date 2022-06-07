@@ -40,15 +40,14 @@ class _StreamState extends State<Stream> {
   }
 
   initialCamera() async {
-    var per = await controller!.getPermissions();
-    if (per.hasAudioPermission && per.hasCameraPermission) {
-      var teste = await controller!.initCamera();
-      print("teste oq veio na camera ${teste}");
+    var permissionsCamera = await controller!.getPermissions();
+    if (permissionsCamera.hasAudioPermission &&
+        permissionsCamera.hasCameraPermission) {
+      await controller!.initCamera();
     } else {
-      print("vai perguntar algo ? ");
-      var permissionsResult = await controller!.requestPermissions();
-      if (permissionsResult.hasCameraPermission) {
-        controller!.initCamera();
+      var requestPermossions = await controller!.requestPermissions();
+      if (requestPermossions.hasCameraPermission) {
+        await controller!.initCamera();
       }
     }
   }
@@ -56,140 +55,131 @@ class _StreamState extends State<Stream> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text("Teste flutter larix"),
-      // ),
-      body: Stack(
-        children: [
-          LayoutBuilder(
-            builder: (context, constraints) {
-              return ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: constraints.maxWidth,
-                  maxHeight: constraints.maxHeight,
-                ),
-                child: Center(
-                  child: Container(
-                    width: 2000,
-                    height: constraints.maxHeight,
-                    color: Colors.blueAccent,
+      appBar: AppBar(
+        title: const Text("Teste flutter larix"),
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: constraints.maxWidth,
+              maxHeight: constraints.maxHeight,
+            ),
+            child: Stack(
+              children: [
+                Container(
+                  color: Colors.black,
+                  height: constraints.maxHeight,
+                  width: constraints.maxWidth,
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
                     child: FlutterLarix(
-                      cameraWidth: constraints.maxWidth.toInt(),
-                      cameraHeight: constraints.maxHeight.toInt(),
+                      cameraResolution: CAMERA_RESOLUTION.HD,
                       cameraType: CAMERA_TYPE.BACK,
-                      url:
-                          "rtmp://origin-v2.vewbie.com:1935/origin/9143dd3b-6f9a-4696-97cb-43c4f78fa43f",
+                      url: "",
                       onCameraViewCreated: onCameraViewCreated,
                       listener: _flutterLarixListener,
                     ),
                   ),
                 ),
-              );
-            },
-          ),
-          Align(
-            alignment: Alignment.topRight,
-            child: GestureDetector(
-              child: Icon(Icons.back_hand_rounded, color: Colors.red[50]),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-          ),
-          if (controller != null)
-            Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 32),
-                  child: LayoutBuilder(builder: (context, constraints) {
-                    return SizedBox(
-                      height: 80,
-                      child: Stack(
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.only(top: 16),
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.5),
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(100),
+                if (controller != null)
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 32),
+                      child: LayoutBuilder(builder: (context, constraints) {
+                        return SizedBox(
+                          height: 80,
+                          child: Stack(
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.only(top: 16),
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.5),
+                                  borderRadius: const BorderRadius.all(
+                                    Radius.circular(100),
+                                  ),
+                                ),
+                                height: 46,
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CameraControlButton(
+                                      icon: controller!.getMicrophoneStatus()
+                                          ? const Icon(
+                                              Icons.mic_off_sharp,
+                                              color: Colors.white,
+                                            )
+                                          : const Icon(
+                                              Icons.mic_rounded,
+                                              color: Colors.white,
+                                            ),
+                                      onTap: () async {
+                                        if (controller!.getMicrophoneStatus()) {
+                                          await controller!.startAudioCapture();
+                                        } else {
+                                          await controller!.stopAudioCapture();
+                                        }
+                                        setState(() {});
+                                      },
+                                    ),
+                                    CameraControlButton(
+                                      icon: const Icon(
+                                        Icons.flip_camera_ios_rounded,
+                                        color: Colors.white,
+                                      ),
+                                      onTap: () async {
+                                        await controller!.setFlip();
+                                        setState(() {});
+                                      },
+                                    ),
+                                    const SizedBox(width: 64, height: 64),
+                                    CameraControlButton(
+                                      icon: controller?.getTorchIsOn() == false
+                                          ? const Icon(
+                                              Icons.flash_off,
+                                              color: Colors.white,
+                                            )
+                                          : const Icon(
+                                              Icons.flash_on,
+                                              color: Colors.white,
+                                            ),
+                                      onTap: () async {
+                                        await controller!.toggleTorch();
+                                        setState(() {});
+                                      },
+                                    ),
+                                    CameraControlButton(
+                                      icon: const Icon(
+                                        Icons.close,
+                                        color: Colors.white,
+                                      ),
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                    )
+                                  ],
+                                ),
                               ),
-                            ),
-                            height: 46,
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                CameraControlButton(
-                                  icon: controller!.getMicrophoneStatus()
-                                      ? const Icon(
-                                          Icons.mic_off_sharp,
-                                          color: Colors.white,
-                                        )
-                                      : const Icon(
-                                          Icons.mic_rounded,
-                                          color: Colors.white,
-                                        ),
-                                  onTap: () async {
-                                    if (controller!.getMicrophoneStatus()) {
-                                      await controller!.startAudioCapture();
-                                    } else {
-                                      await controller!.stopAudioCapture();
-                                    }
-                                    setState(() {});
-                                  },
+                              Positioned(
+                                top: 0,
+                                left: 84,
+                                child: RecordButton(
+                                  controller: controller!,
                                 ),
-                                CameraControlButton(
-                                  icon: const Icon(
-                                    Icons.flip_camera_ios_rounded,
-                                    color: Colors.white,
-                                  ),
-                                  onTap: () async {
-                                    await controller!.setFlip();
-                                    setState(() {});
-                                  },
-                                ),
-                                const SizedBox(width: 64, height: 64),
-                                CameraControlButton(
-                                  icon: controller?.getTorchIsOn() == false
-                                      ? const Icon(
-                                          Icons.flash_off,
-                                          color: Colors.white,
-                                        )
-                                      : const Icon(
-                                          Icons.flash_on,
-                                          color: Colors.white,
-                                        ),
-                                  onTap: () async {
-                                    await controller!.toggleTorch();
-                                    setState(() {});
-                                  },
-                                ),
-                                CameraControlButton(
-                                  icon: const Icon(
-                                    Icons.close,
-                                    color: Colors.white,
-                                  ),
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                  },
-                                )
-                              ],
-                            ),
+                              )
+                            ],
                           ),
-                          Positioned(
-                            top: 0,
-                            left: 84,
-                            child: RecordButton(
-                              controller: controller!,
-                            ),
-                          )
-                        ],
-                      ),
-                    );
-                  }),
-                ))
-        ],
+                        );
+                      }),
+                    ),
+                  )
+              ],
+            ),
+          );
+        },
       ),
     );
   }
