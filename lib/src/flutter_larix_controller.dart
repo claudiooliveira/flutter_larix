@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_larix/src/defs/permissions.dart';
@@ -12,6 +13,7 @@ enum STREAM_STATUS { ON, OFF }
 
 class FlutterLarixController {
   late MethodChannel _channel;
+  late bool isAndroid;
 
   STREAM_STATUS _streamStatus = STREAM_STATUS.OFF;
   bool _muteStatus = false;
@@ -23,16 +25,24 @@ class FlutterLarixController {
   FlutterLarixController({
     required this.options,
   }) {
-    _channel =
+    isAndroid = Platform.isAndroid;
+
+    print("KKKKKKKKKKKKKKKKKKKkK ${isAndroid}");
+    
+    if (isAndroid) {
+      _channel =
         MethodChannel('br.com.devmagic.flutter_larix/nativeview_${options.id}');
-    _channel.setMethodCallHandler((call) async {
-      switch (call.method) {
-        case 'streamChanged':
-          _onStreamChanged(call.arguments);
-          break;
-      }
-      options.listener.call();
-    });
+      _channel.setMethodCallHandler((call) async {
+        switch (call.method) {
+          case 'streamChanged':
+            _onStreamChanged(call.arguments);
+            break;
+        }
+        options.listener.call();
+      });
+    } else {
+      _channel = MethodChannel('br.com.devmagic.flutter_larix/nativeview');
+    }
   }
 
   Future<String> initCamera() async {
