@@ -9,7 +9,6 @@ import Foundation
 import Flutter
 import UIKit
 
-
 public class FlutterLarixView: NSObject, FlutterPlatformView {
     private var _view: UIView
 
