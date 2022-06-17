@@ -40,16 +40,17 @@ class _StreamState extends State<Stream> {
   }
 
   initialCamera() async {
-    var permissionsCamera = await controller!.getPermissions();
-    if (permissionsCamera.hasAudioPermission &&
-        permissionsCamera.hasCameraPermission) {
-      await controller!.initCamera();
-    } else {
-      var requestPermossions = await controller!.requestPermissions();
-      if (requestPermossions.hasCameraPermission) {
-        await controller!.initCamera();
-      }
-    }
+    // var permissionsCamera = await controller!.getPermissions();
+    // print(" teste oq veio aqui ${permissionsCamera}");
+    // if (permissionsCamera.hasAudioPermission &&
+    //     permissionsCamera.hasCameraPermission) {
+    //   await controller!.initCamera();
+    // } else {
+    // var requestPermossions = await controller!.requestPermissions();
+    // if (requestPermossions.hasCameraPermission) {
+    await controller!.initCamera();
+    // }
+    // }
   }
 
   @override

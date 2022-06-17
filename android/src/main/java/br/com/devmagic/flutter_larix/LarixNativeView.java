@@ -108,7 +108,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         container.setOrientation(LinearLayout.VERTICAL);
         container.setLayoutParams(layoutParams);
 
-        methodChannel = new MethodChannel(messenger, "br.com.devmagic.flutter_larix/nativeview_" + id);
+        methodChannel = new MethodChannel(messenger, "br.com.devmagic.flutter_larix/nativeview_controller");
         methodChannel.setMethodCallHandler(this);
 
         ViewGroup root = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.afl_surface, container, true);

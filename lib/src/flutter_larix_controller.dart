@@ -24,7 +24,7 @@ class FlutterLarixController {
     required this.options,
   }) {
     _channel =
-        MethodChannel('br.com.devmagic.flutter_larix/nativeview_${options.id}');
+        MethodChannel('br.com.devmagic.flutter_larix/nativeview_controller');
     _channel.setMethodCallHandler((call) async {
       switch (call.method) {
         case 'streamChanged':
