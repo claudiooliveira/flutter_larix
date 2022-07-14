@@ -12,7 +12,8 @@ class Stream extends StatefulWidget {
 
 class _StreamState extends State<Stream> {
   FlutterLarixController? controller;
-  String broadcastUrl = "<YOUR_STREAM_URL>";
+  String broadcastUrl =
+      "rtmp://origin-v2.vewbie.com:1935/origin/9143dd3b-6f9a-4696-97cb-43c4f78fa43f";
   bool get isStreaming => controller?.getStreamStatus() == STREAM_STATUS.ON;
 
   void _flutterLarixListener() {
@@ -40,17 +41,17 @@ class _StreamState extends State<Stream> {
   }
 
   initialCamera() async {
-    // var permissionsCamera = await controller!.getPermissions();
-    // print(" teste oq veio aqui ${permissionsCamera}");
-    // if (permissionsCamera.hasAudioPermission &&
-    //     permissionsCamera.hasCameraPermission) {
-    //   await controller!.initCamera();
-    // } else {
-    // var requestPermossions = await controller!.requestPermissions();
-    // if (requestPermossions.hasCameraPermission) {
-    await controller!.initCamera();
-    // }
-    // }
+    var permissionsCamera = await controller!.getPermissions();
+    print(" teste oq veio aqui ${permissionsCamera}");
+    if (permissionsCamera.hasAudioPermission &&
+        permissionsCamera.hasCameraPermission) {
+      await controller!.initCamera();
+    } else {
+      var requestPermossions = await controller!.requestPermissions();
+      if (requestPermossions.hasCameraPermission) {
+        await controller!.initCamera();
+      }
+    }
   }
 
   @override
@@ -61,6 +62,8 @@ class _StreamState extends State<Stream> {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
+          print(
+              "APP EXAMPLE SITE: ${constraints.maxWidth}x${constraints.maxHeight}");
           return ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: constraints.maxWidth,
@@ -71,16 +74,13 @@ class _StreamState extends State<Stream> {
                 Container(
                   color: Colors.black,
                   height: constraints.maxHeight,
-                  width: constraints.maxWidth,
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: FlutterLarix(
-                      cameraResolution: CAMERA_RESOLUTION.HD,
-                      cameraType: CAMERA_TYPE.BACK,
-                      url: broadcastUrl,
-                      onCameraViewCreated: onCameraViewCreated,
-                      listener: _flutterLarixListener,
-                    ),
+                  width: constraints.maxWidth + 100,
+                  child: FlutterLarix(
+                    cameraResolution: CAMERA_RESOLUTION.FULLHD,
+                    cameraType: CAMERA_TYPE.BACK,
+                    url: broadcastUrl,
+                    onCameraViewCreated: onCameraViewCreated,
+                    listener: _flutterLarixListener,
                   ),
                 ),
                 if (controller != null)
