@@ -213,11 +213,11 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         builder.setAudioConfig(new AudioConfig());
 
         // default config: h264, 2 mbps, 2 sec. keyframe interval
-        final VideoConfig videoConfig = VideoEncoderSettings.newVideoConfig(
-                mContext, mSize, 30);
+//        final VideoConfig videoConfig = VideoEncoderSettings.newVideoConfig(
+//                mContext, mSize, 30);
 
-//        final VideoConfig videoConfig = new VideoConfig();
-//        videoConfig.videoSize = mSize;
+        final VideoConfig videoConfig = new VideoConfig();
+        videoConfig.videoSize = mSize;
         builder.setVideoConfig(videoConfig);
 
         builder.setCamera2(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP);
