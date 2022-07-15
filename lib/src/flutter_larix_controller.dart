@@ -56,8 +56,14 @@ class FlutterLarixController {
     );
   }
 
-  Future<void> startStream() async {
-    await _channel.invokeMethod('startStream', options.toJson());
+  Future<int?> startStream() async {
+    int streamId = await _channel.invokeMethod('startStream', options.toJson());
+    if (streamId > 0) {
+      return streamId;
+    } else {
+      await Future.delayed(const Duration(milliseconds: 1500), () {});
+      return await startStream();
+    }
   }
 
   Future<void> stopStream() async {

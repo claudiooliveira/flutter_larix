@@ -6,6 +6,8 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.media.MediaCodecList;
+import android.media.MediaCodecInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -218,8 +220,40 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
         final VideoConfig videoConfig = new VideoConfig();
         videoConfig.videoSize = mSize;
-        builder.setVideoConfig(videoConfig);
+//
+//
+//        MediaCodecInfo currentCodec = null;
+//        MediaCodecInfo.CodecProfileLevel codecProfileLevel = null;
+//
+//        final MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
+//        for (MediaCodecInfo codecInfo : mediaCodecList.getCodecInfos()) {
+//            System.out.println("mano só os tipos "+ codecInfo.getSupportedTypes());
+//            System.out.println("mano qual o nome "+ codecInfo.getName());
+//            System.out.println("mano is encoder is here : "+ codecInfo.isEncoder());
+//            if (!codecInfo.isEncoder()) {
+//                continue;
+//            }
+//            for (String type : codecInfo.getSupportedTypes()) {
+//                System.out.println("tipos de decodec "+ type);
+//                if (type.equalsIgnoreCase("video/avc")) {
+//                    currentCodec = codecInfo;
+//                }
+//            }
+//        }
+//
+//        if(currentCodec != null) {
+//            final MediaCodecInfo.CodecCapabilities capabilities = currentCodec.getCapabilitiesForType("video/avc");
+//
+//            for (MediaCodecInfo.CodecProfileLevel profileLevel : capabilities.profileLevels) {
+//                if (profileLevel.profile == 65536) {
+//
+//                    codecProfileLevel =  profileLevel;
+//                }
+//            }
+//        }
+//        videoConfig.profileLevel = codecProfileLevel;
 
+        builder.setVideoConfig(videoConfig);
         builder.setCamera2(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP);
 
         // preview surface
@@ -379,12 +413,11 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         switch(call.method) {
             case "startStream":
                 maybeCreateStream();
-                HashMap<String, Object> map = (HashMap<String, Object>) call.arguments;
-                Log.i("MyTag", "map = " + map.get("cameraWidth")); // {key=value}
-                result.success("true");
+                result.success(connectionId);
                 break;
             case "stopStream":
                 mStreamerGL.releaseConnection(connectionId);
+                result.success(connectionId);
                 break;
             case "flipCamera":
                 for (CameraInfo info : cameraList) {
