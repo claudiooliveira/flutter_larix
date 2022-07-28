@@ -291,8 +291,10 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     @Override
     public void dispose() {
-        mStreamerGL.release();
-        mStreamerGL = null;
+        if (mStreamerGL != null) {
+            mStreamerGL.release();
+            mStreamerGL = null;
+        }
     }
 
     private boolean isPortrait() {
@@ -497,8 +499,10 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 }
                 break;
             case "disposeCamera":
-                mStreamerGL.release();
-                mStreamerGL = null;
+                if (mStreamerGL != null) {
+                    mStreamerGL.release();
+                    mStreamerGL = null;
+                }
                 break;
             default:
                 result.notImplemented();
