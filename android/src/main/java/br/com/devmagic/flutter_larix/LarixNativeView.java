@@ -175,14 +175,13 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
             releaseStreamer();
         }
 
-    };
-
-    private void releaseStreamer() {
-        if (mStreamerGL != null) {
-            mStreamerGL.release();
-            mStreamerGL = null;
+        private void releaseStreamer() {
+            if (mStreamerGL != null) {
+                mStreamerGL.release();
+                mStreamerGL = null;
+            }
         }
-    }
+    };
 
     private HashMap<String, Boolean> checkPermissions() {
         HashMap<String, Boolean> permissions = new HashMap<String, Boolean>();
@@ -292,7 +291,10 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     @Override
     public void dispose() {
-        releaseStreamer();
+        if (mStreamerGL != null) {
+            mStreamerGL.release();
+            mStreamerGL = null;
+        }
     }
 
     private boolean isPortrait() {
@@ -497,7 +499,10 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 }
                 break;
             case "disposeCamera":
-                releaseStreamer();
+                if (mStreamerGL != null) {
+                    mStreamerGL.release();
+                    mStreamerGL = null;
+                }
                 break;
             default:
                 result.notImplemented();
