@@ -175,13 +175,14 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
             releaseStreamer();
         }
 
-        private void releaseStreamer() {
-            if (mStreamerGL != null) {
-                mStreamerGL.release();
-                mStreamerGL = null;
-            }
-        }
     };
+
+    private void releaseStreamer() {
+        if (mStreamerGL != null) {
+            mStreamerGL.release();
+            mStreamerGL = null;
+        }
+    }
 
     private HashMap<String, Boolean> checkPermissions() {
         HashMap<String, Boolean> permissions = new HashMap<String, Boolean>();
