@@ -461,10 +461,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 result.success("true");
                 break;
             case "setZoom":
-
                 Double D = new Double(call.arguments.toString());
-                zoom(D.floatValue());
-                result.success("true");
+                Boolean zoomResult = zoom(D.floatValue());
+                result.success(zoomResult.toString());
                 break;
             case "toggleTorch":
                 mStreamerGL.toggleTorch();
