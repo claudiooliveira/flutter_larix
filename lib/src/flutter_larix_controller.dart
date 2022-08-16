@@ -136,4 +136,5 @@ class FlutterLarixController {
       _streamStatus = STREAM_STATUS.ON;
     }
   }
+  
 }
