@@ -18,8 +18,6 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ScaleGestureDetector;
-import android.view.MotionEvent;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
@@ -66,9 +64,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     private String mUri;
     protected boolean mIsMuted;
     private Handler mHandler;
-    protected ScaleGestureDetector mScaleGestureDetector;
     protected float mScaleFactor;
-    protected Streamer mStreamer;
 
     private Streamer.CaptureState mVideoCaptureState = Streamer.CaptureState.FAILED;
     private Streamer.CaptureState mAudioCaptureState = Streamer.CaptureState.FAILED;
@@ -148,10 +144,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
             mHolder = holder;
             // We got surface to draw on, start streamer creation
-
-            // detect pinch-to-zoom
-            mScaleGestureDetector = new ScaleGestureDetector(mContext, new MyScaleListener());
-
             SimpleOrientationListener mOrientationListener = null;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                 mOrientationListener = new SimpleOrientationListener(
@@ -469,12 +461,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 result.success("true");
                 break;
             case "setZoom":
-                System.out.println("TESTE" + call.arguments);
-                System.out.println("TESTE@##" + call.arguments.getClass().getSimpleName());
 
                 Double D = new Double(call.arguments.toString());
-                float f = D.floatValue();
-                zoom(f);
+                zoom(D.floatValue());
                 result.success("true");
                 break;
             case "toggleTorch":
@@ -525,14 +514,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 result.notImplemented();
         }
 
-    }
-
-    protected class MyScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
-        @Override
-        public boolean onScale(ScaleGestureDetector scaleGestureDetector) {
-            final boolean result = zoom(mScaleFactor * scaleGestureDetector.getScaleFactor());
-            return result;
-        }
     }
 
     protected boolean zoom(float scaleFactor) {
