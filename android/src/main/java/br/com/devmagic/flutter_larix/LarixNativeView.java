@@ -64,6 +64,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     private String mUri;
     protected boolean mIsMuted;
     private Handler mHandler;
+    protected float mScaleFactor;
 
     private Streamer.CaptureState mVideoCaptureState = Streamer.CaptureState.FAILED;
     private Streamer.CaptureState mAudioCaptureState = Streamer.CaptureState.FAILED;
@@ -143,7 +144,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
             mHolder = holder;
             // We got surface to draw on, start streamer creation
-
             SimpleOrientationListener mOrientationListener = null;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                 mOrientationListener = new SimpleOrientationListener(
@@ -460,6 +460,11 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 mStreamerGL.setDisplayRotation(1);
                 result.success("true");
                 break;
+            case "setZoom":
+                Double D = new Double(call.arguments.toString());
+                Boolean zoomResult = zoom(D.floatValue());
+                result.success(zoomResult.toString());
+                break;
             case "toggleTorch":
                 mStreamerGL.toggleTorch();
                 result.success(mStreamerGL.isTorchOn() ? "true" : "false");
@@ -509,4 +514,25 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         }
 
     }
+
+    protected boolean zoom(float scaleFactor) {
+        if (mStreamerGL == null || mVideoCaptureState != Streamer.CaptureState.STARTED) {
+            return false;
+        }
+
+        // Don't let the object get too small or too large.
+        mScaleFactor = Math.max(1.0f, Math.min(scaleFactor, mStreamerGL.getMaxZoom()));
+
+        final float delta = Math.abs(mScaleFactor - mStreamerGL.getZoom());
+
+        if (mScaleFactor > 1.0f && delta < 0.01f) {
+            return false;
+        }
+
+        mScaleFactor = Math.round(mScaleFactor * 100) / 100f;
+        mStreamerGL.zoomTo(mScaleFactor);
+
+        return true; // consume touch event
+    }
+
 }
