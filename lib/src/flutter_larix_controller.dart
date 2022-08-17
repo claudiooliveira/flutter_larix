@@ -4,6 +4,8 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_larix/src/defs/connectionStatistics.dart';
+import 'package:flutter_larix/src/defs/connectionStatisticsFormated.dart';
 import 'package:flutter_larix/src/defs/permissions.dart';
 import 'package:flutter_larix/src/defs/stream_changed.dart';
 import 'package:flutter_larix/src/flutter_larix_controller_options.dart';
@@ -30,6 +32,9 @@ class FlutterLarixController {
         case 'streamChanged':
           _onStreamChanged(call.arguments);
           break;
+        case 'connectionStatistics':
+          connectionStatistics(call.arguments);
+          return;
       }
       options.listener.call();
     });
@@ -136,5 +141,53 @@ class FlutterLarixController {
       _streamStatus = STREAM_STATUS.ON;
     }
   }
-  
+
+  StreamController<ConnectionStatisticsFormatedModel>
+      connectionStatisticsStream =
+      StreamController<ConnectionStatisticsFormatedModel>();
+
+  void connectionStatistics(arguments) {
+    ConnectionStatisticsModel streamChanged =
+        ConnectionStatisticsModel.fromJson(
+      HashMap.from(arguments),
+    );
+    connectionStatisticsStream.add(
+      ConnectionStatisticsFormatedModel(
+        bandwidth: bandwidthToString(streamChanged.bandwidth),
+        traffic: trafficToString(streamChanged.traffic),
+      ),
+    );
+  }
+
+  String bandwidthToString(int bps) {
+    if (bps < 1000) {
+      // bps
+      return "${bps.toStringAsPrecision(2)}bps";
+    } else if (bps < 1000 * 1000) {
+      // Kbps
+      return "${(bps / 1000).toStringAsPrecision(2)}Kbps";
+    } else if (bps < 1000 * 1000 * 1000) {
+      // Mbps
+      return "${(bps / (1000 * 1000)).toStringAsPrecision(2)}Mbps";
+    } else {
+      // Gbps
+      return "${(bps / (1000 * 1000 * 1000)).toStringAsPrecision(2)}Gbps";
+    }
+  }
+
+  String trafficToString(int bytes) {
+    if (bytes < 1024) {
+      // B
+      return "${bytes}B";
+    } else if (bytes < 1024 * 1024) {
+      // KB
+      return "${(bytes / 1024).toStringAsPrecision(2)}KB";
+    } else if (bytes < 1024 * 1024 * 1024) {
+      // MB
+      return "${(bytes / (1024 * 1024)).toStringAsPrecision(2)}MB";
+    } else {
+      // GB
+      return "${(bytes / (1024 * 1024 * 1024)).toStringAsPrecision(2)}GB";
+    }
+  }
 }

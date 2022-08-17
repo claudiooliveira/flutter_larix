@@ -26,6 +26,7 @@ import androidx.core.content.ContextCompat;
 
 import com.wmspanel.libstream.AudioConfig;
 import com.wmspanel.libstream.CameraConfig;
+import com.wmspanel.libcommon.ConnectionStatistics;
 import com.wmspanel.libstream.ConnectionConfig;
 import com.wmspanel.libstream.Streamer;
 import com.wmspanel.libstream.StreamerGL;
@@ -48,6 +49,8 @@ import io.flutter.plugin.platform.PlatformView;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 class LarixNativeView implements PlatformView, Streamer.Listener, Application.ActivityLifecycleCallbacks, MethodChannel.MethodCallHandler {
     @NonNull private final LinearLayout container;
@@ -64,6 +67,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     private String mUri;
     protected boolean mIsMuted;
     private Handler mHandler;
+    private final Map<Integer, ConnectionStatistics> mConnectionStatistics = new HashMap();
+    private final Map<Integer, Streamer.ConnectionState> mConnectionState = new HashMap<>();
+
     protected float mScaleFactor;
 
     private Streamer.CaptureState mVideoCaptureState = Streamer.CaptureState.FAILED;
@@ -73,6 +79,8 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     private SurfaceView mSurfaceView;
     private SurfaceHolder mHolder;
+    private Timer mUpdateStatisticsTimer;
+
     @NonNull
     StreamerGLBuilder builder;
     int connectionId = 0;
@@ -218,10 +226,10 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 //        final VideoConfig videoConfig = VideoEncoderSettings.newVideoConfig(
 //                mContext, mSize, 30);
 
-        final VideoConfig videoConfig = new VideoConfig();
-        videoConfig.videoSize = mSize;
-//
-//
+       final VideoConfig videoConfig = new VideoConfig();
+       videoConfig.videoSize = mSize;
+    //    
+    // 
 //        MediaCodecInfo currentCodec = null;
 //        MediaCodecInfo.CodecProfileLevel codecProfileLevel = null;
 //
@@ -291,6 +299,10 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     @Override
     public void dispose() {
+        if (mUpdateStatisticsTimer != null) {
+            mUpdateStatisticsTimer.cancel();
+            mUpdateStatisticsTimer = null;
+        }
         if (mStreamerGL != null) {
             mStreamerGL.release();
             mStreamerGL = null;
@@ -339,6 +351,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     public void onConnectionStateChanged(int i, Streamer.ConnectionState connectionState, Streamer.Status status, JSONObject jsonObject) {
         Map<String, Object> data = new HashMap<>();
         data.put("connectionState", connectionState.name());
+        mConnectionState.put(connectionId, connectionState);
         methodChannel.invokeMethod("streamChanged", data);
 
     }
@@ -350,8 +363,56 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
             ConnectionConfig conn = new ConnectionConfig();
             conn.uri = mUri;
             connectionId = mStreamerGL.createConnection(conn);
+
+            mConnectionStatistics.put(connectionId, new ConnectionStatistics());
+
+            mUpdateStatisticsTimer = new Timer();
+            mUpdateStatisticsTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    mHandler.post(mUpdateStatistics);
+                }
+            }, 1000, 1000);
         }
-    }
+
+            Streamer.ConnectionState state = mConnectionState.get(connectionId);
+            if (state == Streamer.ConnectionState.RECORD) {
+                ConnectionStatistics statistics = mConnectionStatistics.get(connectionId);
+                if (statistics != null) {
+                    statistics.update(mStreamerGL, connectionId);
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("bandwidth", statistics.getBandwidth());
+                    data.put("traffic", statistics.getTraffic());
+                    methodChannel.invokeMethod("connectionStatistics", data);
+                }
+            }
+        }
+    };
+
+    protected final Runnable mUpdateStatistics = new Runnable() {
+        @Override
+        public void run() {
+            if (mStreamerGL == null) {
+                return;
+            }
+
+            if (connectionId == 0) {
+                return;
+            }
+
+            Streamer.ConnectionState state = mConnectionState.get(connectionId);
+            if (state == Streamer.ConnectionState.RECORD) {
+                ConnectionStatistics statistics = mConnectionStatistics.get(connectionId);
+                if (statistics != null) {
+                    statistics.update(mStreamerGL, connectionId);
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("bandwidth", statistics.getBandwidth());
+                    data.put("traffic", statistics.getTraffic());
+                    methodChannel.invokeMethod("connectionStatistics", data);
+                }
+            }
+        }
+    };
 
     protected void mute(boolean mute) {
         if (mStreamerGL == null) {
@@ -419,6 +480,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 break;
             case "stopStream":
                 mStreamerGL.releaseConnection(connectionId);
+                mConnectionState.remove(connectionId);
                 result.success(connectionId);
                 break;
             case "flipCamera":
