@@ -70,6 +70,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     private final Map<Integer, ConnectionStatistics> mConnectionStatistics = new HashMap();
     private final Map<Integer, Streamer.ConnectionState> mConnectionState = new HashMap<>();
 
+    protected float mScaleFactor;
 
     private Streamer.CaptureState mVideoCaptureState = Streamer.CaptureState.FAILED;
     private Streamer.CaptureState mAudioCaptureState = Streamer.CaptureState.FAILED;
@@ -151,7 +152,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
             mHolder = holder;
             // We got surface to draw on, start streamer creation
-
             SimpleOrientationListener mOrientationListener = null;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                 mOrientationListener = new SimpleOrientationListener(
@@ -374,7 +374,20 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 }
             }, 1000, 1000);
         }
-    }
+
+            Streamer.ConnectionState state = mConnectionState.get(connectionId);
+            if (state == Streamer.ConnectionState.RECORD) {
+                ConnectionStatistics statistics = mConnectionStatistics.get(connectionId);
+                if (statistics != null) {
+                    statistics.update(mStreamerGL, connectionId);
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("bandwidth", statistics.getBandwidth());
+                    data.put("traffic", statistics.getTraffic());
+                    methodChannel.invokeMethod("connectionStatistics", data);
+                }
+            }
+        }
+    };
 
     protected final Runnable mUpdateStatistics = new Runnable() {
         @Override
@@ -509,6 +522,11 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 mStreamerGL.setDisplayRotation(1);
                 result.success("true");
                 break;
+            case "setZoom":
+                Double D = new Double(call.arguments.toString());
+                Boolean zoomResult = zoom(D.floatValue());
+                result.success(zoomResult.toString());
+                break;
             case "toggleTorch":
                 mStreamerGL.toggleTorch();
                 result.success(mStreamerGL.isTorchOn() ? "true" : "false");
@@ -558,4 +576,25 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         }
 
     }
+
+    protected boolean zoom(float scaleFactor) {
+        if (mStreamerGL == null || mVideoCaptureState != Streamer.CaptureState.STARTED) {
+            return false;
+        }
+
+        // Don't let the object get too small or too large.
+        mScaleFactor = Math.max(1.0f, Math.min(scaleFactor, mStreamerGL.getMaxZoom()));
+
+        final float delta = Math.abs(mScaleFactor - mStreamerGL.getZoom());
+
+        if (mScaleFactor > 1.0f && delta < 0.01f) {
+            return false;
+        }
+
+        mScaleFactor = Math.round(mScaleFactor * 100) / 100f;
+        mStreamerGL.zoomTo(mScaleFactor);
+
+        return true; // consume touch event
+    }
+
 }

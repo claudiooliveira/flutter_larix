@@ -111,6 +111,10 @@ class FlutterLarixController {
     await _channel.invokeMethod('flipCamera');
   }
 
+  Future<void> setZoom(double zoom) async {
+    await _channel.invokeMethod('setZoom', zoom);
+  }
+
   Future<void> toggleTorch() async {
     var result = await _channel.invokeMethod('toggleTorch');
     _torchIsOn = result == "true";
