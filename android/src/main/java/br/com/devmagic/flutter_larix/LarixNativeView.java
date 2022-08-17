@@ -299,6 +299,10 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     @Override
     public void dispose() {
+        if (mUpdateStatisticsTimer != null) {
+            mUpdateStatisticsTimer.cancel();
+            mUpdateStatisticsTimer = null;
+        }
         if (mStreamerGL != null) {
             mStreamerGL.release();
             mStreamerGL = null;
@@ -462,15 +466,8 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 result.success(connectionId);
                 break;
             case "stopStream":
-                if (mUpdateStatisticsTimer != null) {
-                    System.out.println("print mUpdateStatisticsTimer != null");
-                    mUpdateStatisticsTimer.cancel();
-                    mUpdateStatisticsTimer = null;
-                }
                 mStreamerGL.releaseConnection(connectionId);
                 mConnectionState.remove(connectionId);
-
-
                 result.success(connectionId);
                 break;
             case "flipCamera":
@@ -551,12 +548,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 }
                 break;
             case "disposeCamera":
-                System.out.println("print disposeCamera");
-                if (mUpdateStatisticsTimer != null) {
-                    System.out.println("print mUpdateStatisticsTimer != null");
-                    mUpdateStatisticsTimer.cancel();
-                    mUpdateStatisticsTimer = null;
-                }
                 if (mStreamerGL != null) {
                     mStreamerGL.release();
                     mStreamerGL = null;
