@@ -386,7 +386,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                     methodChannel.invokeMethod("connectionStatistics", data);
                 }
             }
-        }
+
     };
 
     protected final Runnable mUpdateStatistics = new Runnable() {
@@ -423,7 +423,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         // Some players can stop playback if client keeps sending video, but sends no audio packets
         // Option 2 (workaround) - set PCM sound level to zero and encode
         // This produces silence in audio stream
-        
+
         if (mAudioCaptureState == Streamer.CaptureState.STARTED) {
             mIsMuted = mute;
             mStreamerGL.setSilence(mIsMuted);
