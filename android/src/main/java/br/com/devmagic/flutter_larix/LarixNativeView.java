@@ -581,18 +581,12 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         if (mStreamerGL == null || mVideoCaptureState != Streamer.CaptureState.STARTED) {
             return false;
         }
-
+        
         // Don't let the object get too small or too large.
-        mScaleFactor = Math.max(1.0f, Math.min(scaleFactor, mStreamerGL.getMaxZoom()));
+        mScaleFactor = mScaleFactor * scaleFactor;
+        mScaleFactor = Math.max(1.0f, Math.min(mScaleFactor, mStreamerGL.getMaxZoom()));
 
-        final float delta = Math.abs(mScaleFactor - mStreamerGL.getZoom());
-
-        if (mScaleFactor > 1.0f && delta < 0.01f) {
-            return false;
-        }
-
-        mScaleFactor = Math.round(mScaleFactor * 100) / 100f;
-        mStreamerGL.zoomTo(mScaleFactor);
+        mStreamerGL.zoomTo(Math.round(mScaleFactor));
 
         return true; // consume touch event
     }
