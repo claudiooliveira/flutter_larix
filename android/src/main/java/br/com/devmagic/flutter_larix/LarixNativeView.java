@@ -13,7 +13,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Display;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -49,6 +51,7 @@ import io.flutter.plugin.platform.PlatformView;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -89,6 +92,8 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     private @NonNull Activity activity;
 
     private MethodChannel methodChannel;
+
+    SimpleOrientationListener mOrientationListener;
 
     LarixNativeView(BinaryMessenger messenger, PermissionsRegistry permissionsAdder, CameraPermissions cameraPermissions ,Activity activity, @NonNull Context context, int id, @Nullable Map<String, Object> creationParams) {
         mContext = context;
@@ -131,7 +136,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     }
 
     private Streamer.Size getResolution(Map creationParams) {
-        String resolution = creationParams.get("resolution").toString();
+        String resolution = Objects.requireNonNull(creationParams.get("resolution")).toString();
         switch (resolution) {
             case "SD":
                 return new Streamer.Size(720, 480);
@@ -146,13 +151,15 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
 
+            Log.e("DESTROYED", "RECREATED");
+
             if (mHolder != null) {
                 return;
             }
 
             mHolder = holder;
             // We got surface to draw on, start streamer creation
-            SimpleOrientationListener mOrientationListener = null;
+            mOrientationListener = null;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                 mOrientationListener = new SimpleOrientationListener(
                         mContext) {
@@ -168,6 +175,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 };
             }
             mOrientationListener.enable();
+            createStreamer(mHolder);
         }
 
         @Override
@@ -180,6 +188,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
             mHolder = null;
+            Log.e("DESTROYED", "DESTROYED BROOOOOO");
             releaseStreamer();
         }
 
@@ -205,69 +214,42 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         return permissions;
     }
 
-    private void createStreamer() {
+    private void createStreamer(SurfaceHolder mHolder) {
         if (mStreamerGL != null) {
             return;
         }
+
+        Log.e("DETROYED", "CREATE STREAMEEEEEEEEEEEEERRRR");
 
         builder = new StreamerGLBuilder();
         boolean camera2 = CameraRegistry.allowCamera2Support(mContext);
         cameraList = CameraRegistry.getCameraList(mContext, camera2);
         activeCameraInfo = CameraSettings.getActiveCameraInfo(mContext, mCameraId, cameraList);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            builder.setContext(mContext);
-        }
+        builder.setContext(mContext);
         builder.setListener(this);
 
         // default config: 44.1kHz, Mono, CAMCORDER input
         builder.setAudioConfig(new AudioConfig());
 
-        // default config: h264, 2 mbps, 2 sec. keyframe interval
-//        final VideoConfig videoConfig = VideoEncoderSettings.newVideoConfig(
-//                mContext, mSize, 30);
+        float fps = Float.parseFloat("30");
 
-       final VideoConfig videoConfig = new VideoConfig();
-       videoConfig.videoSize = mSize;
-    //    
-    // 
-//        MediaCodecInfo currentCodec = null;
-//        MediaCodecInfo.CodecProfileLevel codecProfileLevel = null;
-//
-//        final MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
-//        for (MediaCodecInfo codecInfo : mediaCodecList.getCodecInfos()) {
-//            System.out.println("mano só os tipos "+ codecInfo.getSupportedTypes());
-//            System.out.println("mano qual o nome "+ codecInfo.getName());
-//            System.out.println("mano is encoder is here : "+ codecInfo.isEncoder());
-//            if (!codecInfo.isEncoder()) {
-//                continue;
-//            }
-//            for (String type : codecInfo.getSupportedTypes()) {
-//                System.out.println("tipos de decodec "+ type);
-//                if (type.equalsIgnoreCase("video/avc")) {
-//                    currentCodec = codecInfo;
-//                }
-//            }
-//        }
-//
-//        if(currentCodec != null) {
-//            final MediaCodecInfo.CodecCapabilities capabilities = currentCodec.getCapabilitiesForType("video/avc");
-//
-//            for (MediaCodecInfo.CodecProfileLevel profileLevel : capabilities.profileLevels) {
-//                if (profileLevel.profile == 65536) {
-//
-//                    codecProfileLevel =  profileLevel;
-//                }
-//            }
-//        }
-//        videoConfig.profileLevel = codecProfileLevel;
+//       final VideoConfig videoConfig = new VideoConfig();
+//       videoConfig.videoSize = mSize;
+
+        final Streamer.Size encoderVideoSize = isPortrait() ?
+                new Streamer.Size(mSize.height, mSize.width) : mSize;
+
+        final VideoConfig videoConfig = VideoEncoderSettings.newVideoConfig(
+                mContext, encoderVideoSize, fps);
+        //builder.setVideoConfig(videoConfig);
 
         builder.setVideoConfig(videoConfig);
         builder.setCamera2(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP);
 
         // preview surface
         builder.setSurface(mHolder.getSurface());
+        builder.setFullView(true);
         builder.setSurfaceSize(new Streamer.Size(mSurfaceView.getWidth(), mSurfaceView.getHeight()));
-
 
         // we add single default back camera
         final CameraConfig cameraConfig = new CameraConfig();
@@ -318,7 +300,13 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     }
 
     private int displayRotation() {
-        return activity.getWindowManager().getDefaultDisplay().getRotation();
+        final Display display;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            display = activity.getWindowManager().getDefaultDisplay();
+        } else {
+            display = activity.getDisplay();
+        }
+        return display != null ? display.getRotation() : Surface.ROTATION_90;
     }
 
     private void updatePreviewRatio(AspectFrameLayout frame, Streamer.Size size) {
@@ -479,24 +467,28 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 result.success(connectionId);
                 break;
             case "stopStream":
-                mStreamerGL.releaseConnection(connectionId);
-                mConnectionState.remove(connectionId);
-                result.success(connectionId);
+                if (mStreamerGL != null) {
+                    mStreamerGL.releaseConnection(connectionId);
+                    mConnectionState.remove(connectionId);
+                    result.success(connectionId);
+                }
                 break;
             case "flipCamera":
-                for (CameraInfo info : cameraList) {
-                    if (!info.cameraId.contains(mCameraId)) {
-                        activeCameraInfo = CameraSettings.getActiveCameraInfo(mContext, info.cameraId, cameraList);
+                if (mStreamerGL != null) {
+                    for (CameraInfo info : cameraList) {
+                        if (!info.cameraId.contains(mCameraId)) {
+                            activeCameraInfo = CameraSettings.getActiveCameraInfo(mContext, info.cameraId, cameraList);
+                        }
                     }
+                    final CameraConfig flipCameraConfig = new CameraConfig();
+                    flipCameraConfig.cameraId = activeCameraInfo.cameraId;
+                    flipCameraConfig.videoSize = mSize;
+                    builder.addCamera(flipCameraConfig);
+                    mStreamerGL.flip();
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("cameraId", activeCameraInfo.cameraId);
+                    result.success(data);
                 }
-                final CameraConfig flipCameraConfig = new CameraConfig();
-                flipCameraConfig.cameraId = activeCameraInfo.cameraId;
-                flipCameraConfig.videoSize = mSize;
-                builder.addCamera(flipCameraConfig);
-                mStreamerGL.flip();
-                Map<String, Object> data = new HashMap<>();
-                data.put("cameraId", activeCameraInfo.cameraId);
-                result.success(data);
                 break;
             case "stopAudioCapture":
                 mute(true);
@@ -511,16 +503,22 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 result.success(dataAudioStart);
                 break;
             case "stopVideoCapture":
-                mStreamerGL.stopVideoCapture();
-                result.success("true");
+                if (mStreamerGL != null) {
+                    mStreamerGL.stopVideoCapture();
+                    result.success("true");
+                }
                 break;
             case "startVideoCapture":
-                mStreamerGL.startVideoCapture();
-                result.success("true");
+                if (mStreamerGL != null) {
+                    mStreamerGL.startVideoCapture();
+                    result.success("true");
+                }
                 break;
             case "setDisplayRotation":
-                mStreamerGL.setDisplayRotation(1);
-                result.success("true");
+                if (mStreamerGL != null) {
+                    mStreamerGL.setDisplayRotation(1);
+                    result.success("true");
+                }
                 break;
             case "setZoom":
                 Double D = new Double(call.arguments.toString());
@@ -528,8 +526,10 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 result.success(zoomResult.toString());
                 break;
             case "toggleTorch":
-                mStreamerGL.toggleTorch();
-                result.success(mStreamerGL.isTorchOn() ? "true" : "false");
+                if (mStreamerGL != null) {
+                    mStreamerGL.toggleTorch();
+                    result.success(mStreamerGL.isTorchOn() ? "true" : "false");
+                }
                 break;
             case "getPermissions":
                 Map<String, Boolean> permissions = new HashMap();
@@ -559,7 +559,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
             case "initCamera":
                 HashMap<String, Boolean> permission = checkPermissions();
                 if (permission.get("cameraAllowed") && permission.get("audioAllowed")) {
-                    createStreamer();
+                    createStreamer(mHolder);
                     result.success("camera started");
                 } else {
                     result.success("camera without permission");
