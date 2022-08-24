@@ -385,7 +385,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                     Map<String, Object> data = new HashMap<>();
                     data.put("bandwidth", statistics.getBandwidth());
                     data.put("traffic", statistics.getTraffic());
-                    Log.e("TRAFFIC" , "" + data);
+                    //Log.e("TRAFFIC" , "" + data);
                     methodChannel.invokeMethod("connectionStatistics", data);
                 }
             }
@@ -411,7 +411,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                     Map<String, Object> data = new HashMap<>();
                     data.put("bandwidth", statistics.getBandwidth());
                     data.put("traffic", statistics.getTraffic());
-                    Log.e("TRAFFIC" , "" + data);
+                    //Log.e("TRAFFIC" , "" + data);
                     methodChannel.invokeMethod("connectionStatistics", data);
                 }
             }
@@ -524,28 +524,18 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 break;
             case "getRotatePermission":
                 boolean permissionRotate = Settings.System.getInt(activity.getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, 0) == 1;
-                Log.e("VALUE 3333", "" + permissionRotate);
                 result.success(permissionRotate);
                 break;
             case "setDisplayRotation":
                 int value = new Integer(call.arguments.toString());
-//                Log.e("VALUE", "" + value);
-////                if(value != 1){
-////                    mStreamerGL.setDisplayRotation(displayRotation());
-////                }
-////          mStreamerGL.setVideoOrientation(value);
-//
-//
-//                Log.e("VALUE 1:", "" + videoOrientation());
-//                Log.e("VALUE 2:", "" + displayRotation());
 
                 builder.setVideoOrientation(videoOrientation());
-                //builder.setDisplayRotation(displayRotation());
 
                 if(value == 3){
                     // TEM QUE FAZER ISSO POIS QUANDO VIRA O CELULAR
                     // PARA A DIREITA, A LIVE FICA DE PONTA CABECA
                     // COM ESSE METODO, É INVERTIDO O SENTIDO DA LIVE
+                    // E A LIVE E A CAMERA VOLTAM PARA A POSICAO CORRETA
                     mStreamerGL.setDisplayRotation(2);
                 }else{
                     mStreamerGL.setDisplayRotation(displayRotation());
