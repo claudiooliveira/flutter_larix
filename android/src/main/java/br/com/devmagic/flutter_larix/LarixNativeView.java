@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -92,7 +93,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     LarixNativeView(BinaryMessenger messenger, PermissionsRegistry permissionsAdder, CameraPermissions cameraPermissions ,Activity activity, @NonNull Context context, int id, @Nullable Map<String, Object> creationParams) {
         mContext = context;
-
         this.activity = activity;
         this.cameraPermissions = cameraPermissions;
         this.permissionsRegistry = permissionsAdder;
@@ -228,8 +228,8 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
        final VideoConfig videoConfig = new VideoConfig();
        videoConfig.videoSize = mSize;
-    //    
-    // 
+    //
+    //
 //        MediaCodecInfo currentCodec = null;
 //        MediaCodecInfo.CodecProfileLevel codecProfileLevel = null;
 //
@@ -518,8 +518,14 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 mStreamerGL.startVideoCapture();
                 result.success("true");
                 break;
+            case "getRotatePermission":
+                boolean permissionRotate = Settings.System.getInt(activity.getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, 0) == 1;
+                result.success(permissionRotate);
+                break;
             case "setDisplayRotation":
-                mStreamerGL.setDisplayRotation(1);
+                int value = new Integer(call.arguments.toString());
+                builder.setVideoOrientation(videoOrientation());
+                mStreamerGL.setDisplayRotation(value);
                 result.success("true");
                 break;
             case "setZoom":
@@ -581,7 +587,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         if (mStreamerGL == null || mVideoCaptureState != Streamer.CaptureState.STARTED) {
             return false;
         }
-        
+
         // Don't let the object get too small or too large.
         mScaleFactor = mScaleFactor * scaleFactor;
         mScaleFactor = Math.max(1.0f, Math.min(mScaleFactor, mStreamerGL.getMaxZoom()));
