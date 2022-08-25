@@ -90,11 +90,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     private @NonNull Activity activity;
 
     private MethodChannel methodChannel;
-    PackageManager manager;// = context.getPackageManager();
 
     LarixNativeView(BinaryMessenger messenger, PermissionsRegistry permissionsAdder, CameraPermissions cameraPermissions ,Activity activity, @NonNull Context context, int id, @Nullable Map<String, Object> creationParams) {
         mContext = context;
-        manager = context.getPackageManager();
         this.activity = activity;
         this.cameraPermissions = cameraPermissions;
         this.permissionsRegistry = permissionsAdder;
@@ -385,7 +383,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                     Map<String, Object> data = new HashMap<>();
                     data.put("bandwidth", statistics.getBandwidth());
                     data.put("traffic", statistics.getTraffic());
-                    //Log.e("TRAFFIC" , "" + data);
                     methodChannel.invokeMethod("connectionStatistics", data);
                 }
             }
@@ -411,7 +408,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                     Map<String, Object> data = new HashMap<>();
                     data.put("bandwidth", statistics.getBandwidth());
                     data.put("traffic", statistics.getTraffic());
-                    //Log.e("TRAFFIC" , "" + data);
                     methodChannel.invokeMethod("connectionStatistics", data);
                 }
             }
