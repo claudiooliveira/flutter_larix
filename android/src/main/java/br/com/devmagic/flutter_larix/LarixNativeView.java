@@ -228,8 +228,8 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
        final VideoConfig videoConfig = new VideoConfig();
        videoConfig.videoSize = mSize;
-    //    
-    // 
+    //
+    //
 //        MediaCodecInfo currentCodec = null;
 //        MediaCodecInfo.CodecProfileLevel codecProfileLevel = null;
 //
@@ -524,18 +524,8 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 break;
             case "setDisplayRotation":
                 int value = new Integer(call.arguments.toString());
-
                 builder.setVideoOrientation(videoOrientation());
-
-                if(value == 3){
-                    // TEM QUE FAZER ISSO POIS QUANDO VIRA O CELULAR
-                    // PARA A DIREITA, A LIVE FICA DE PONTA CABECA
-                    // COM ESSE METODO, É INVERTIDO O SENTIDO DA LIVE
-                    // E A LIVE E A CAMERA VOLTAM PARA A POSICAO CORRETA
-                    mStreamerGL.setDisplayRotation(2);
-                }else{
-                    mStreamerGL.setDisplayRotation(displayRotation());
-                }
+                mStreamerGL.setDisplayRotation(value);
                 result.success("true");
                 break;
             case "setZoom":
@@ -597,7 +587,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         if (mStreamerGL == null || mVideoCaptureState != Streamer.CaptureState.STARTED) {
             return false;
         }
-        
+
         // Don't let the object get too small or too large.
         mScaleFactor = mScaleFactor * scaleFactor;
         mScaleFactor = Math.max(1.0f, Math.min(mScaleFactor, mStreamerGL.getMaxZoom()));
