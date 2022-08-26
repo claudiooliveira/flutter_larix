@@ -151,23 +151,25 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
             }
 
             mHolder = holder;
-            // We got surface to draw on, start streamer creation
-            SimpleOrientationListener mOrientationListener = null;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                mOrientationListener = new SimpleOrientationListener(
-                        mContext) {
 
-                    @Override
-                    public void onSimpleOrientationChanged(int orientation) {
-                        if(orientation == Configuration.ORIENTATION_LANDSCAPE && mStreamerGL != null){
-                            mStreamerGL.setVideoOrientation(StreamerGL.Orientations.LANDSCAPE);
-                        }else if(orientation == Configuration.ORIENTATION_PORTRAIT && mStreamerGL != null){
-                            mStreamerGL.setVideoOrientation(StreamerGL.Orientations.PORTRAIT);
-                        }
-                    }
-                };
-            }
-            mOrientationListener.enable();
+            //COMENTADO POIS AGORA É O FLUTTER QUE ENVIA A HORA QUE TEM QUE VIRAR
+//            // We got surface to draw on, start streamer creation
+//            SimpleOrientationListener mOrientationListener = null;
+//            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+//                mOrientationListener = new SimpleOrientationListener(
+//                        mContext) {
+//
+//                    @Override
+//                    public void onSimpleOrientationChanged(int orientation) {
+//                        if(orientation == Configuration.ORIENTATION_LANDSCAPE && mStreamerGL != null){
+//                            mStreamerGL.setVideoOrientation(StreamerGL.Orientations.LANDSCAPE);
+//                        }else if(orientation == Configuration.ORIENTATION_PORTRAIT && mStreamerGL != null){
+//                            mStreamerGL.setVideoOrientation(StreamerGL.Orientations.PORTRAIT);
+//                        }
+//                    }
+//                };
+//            }
+//            mOrientationListener.enable();
         }
 
         @Override
