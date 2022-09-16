@@ -40,8 +40,8 @@ class FlutterLarixController {
     });
   }
 
-  Future<String> initCamera() async {
-    return await _channel.invokeMethod('initCamera');
+  Future<String> initCamera(int bitRate) async {
+    return await _channel.invokeMethod('initCamera', bitRate);
   }
 
   Future<void> disposeCamera() async {

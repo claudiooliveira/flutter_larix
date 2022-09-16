@@ -208,7 +208,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         return permissions;
     }
 
-    private void createStreamer() {
+    private void createStreamer(int bitRate) {
         if (mStreamerGL != null) {
             return;
         }
@@ -231,6 +231,10 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
        final VideoConfig videoConfig = new VideoConfig();
        videoConfig.videoSize = mSize;
+
+       if(bitRate != 0){
+        videoConfig.bitRate = bitRate;
+       }
     //
     //
 //        MediaCodecInfo currentCodec = null;
@@ -565,9 +569,11 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                         });
                 break;
             case "initCamera":
+                int bitRateValue = new Integer(call.arguments.toString());
+                
                 HashMap<String, Boolean> permission = checkPermissions();
                 if (permission.get("cameraAllowed") && permission.get("audioAllowed")) {
-                    createStreamer();
+                    createStreamer(bitRateValue);
                     result.success("camera started");
                 } else {
                     result.success("camera without permission");
