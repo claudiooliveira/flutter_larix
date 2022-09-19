@@ -45,11 +45,11 @@ class _StreamState extends State<Stream> {
     print(" teste oq veio aqui ${permissionsCamera}");
     if (permissionsCamera.hasAudioPermission &&
         permissionsCamera.hasCameraPermission) {
-      await controller!.initCamera();
+      await controller!.initCamera(2000000);
     } else {
       var requestPermossions = await controller!.requestPermissions();
       if (requestPermossions.hasCameraPermission) {
-        await controller!.initCamera();
+        await controller!.initCamera(2000000);
       }
     }
   }
