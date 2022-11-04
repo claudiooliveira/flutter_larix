@@ -91,6 +91,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     private MethodChannel methodChannel;
 
+
     LarixNativeView(BinaryMessenger messenger, PermissionsRegistry permissionsAdder, CameraPermissions cameraPermissions ,Activity activity, @NonNull Context context, int id, @Nullable Map<String, Object> creationParams) {
         mContext = context;
         this.activity = activity;
@@ -226,17 +227,14 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         builder.setAudioConfig(new AudioConfig());
 
         // default config: h264, 2 mbps, 2 sec. keyframe interval
-//        final VideoConfig videoConfig = VideoEncoderSettings.newVideoConfig(
-//                mContext, mSize, 30);
 
-       final VideoConfig videoConfig = new VideoConfig();
+        final VideoConfig videoConfig = new VideoConfig();
        videoConfig.videoSize = mSize;
 
        if(bitRate != 0){
         videoConfig.bitRate = bitRate;
        }
-    //
-    //
+
 //        MediaCodecInfo currentCodec = null;
 //        MediaCodecInfo.CodecProfileLevel codecProfileLevel = null;
 //
@@ -341,7 +339,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     @Override
     public void onRecordStateChanged(Streamer.RecordState recordState, Uri uri, Streamer.SaveMethod saveMethod) {
-
     }
 
     @Override
@@ -369,17 +366,21 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 && mAudioCaptureState == Streamer.CaptureState.STARTED) {
             ConnectionConfig conn = new ConnectionConfig();
             conn.uri = mUri;
+
             connectionId = mStreamerGL.createConnection(conn);
 
             mConnectionStatistics.put(connectionId, new ConnectionStatistics());
-
+            if (mUpdateStatisticsTimer != null) {
+                mUpdateStatisticsTimer.cancel();
+                mUpdateStatisticsTimer = null;
+            }
             mUpdateStatisticsTimer = new Timer();
             mUpdateStatisticsTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     mHandler.post(mUpdateStatistics);
                 }
-            }, 1000, 1000);
+            }, 3000, 3000);
         }
 
             Streamer.ConnectionState state = mConnectionState.get(connectionId);
@@ -394,11 +395,12 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 }
             }
 
-    };
+    }
 
     protected final Runnable mUpdateStatistics = new Runnable() {
         @Override
         public void run() {
+
             if (mStreamerGL == null) {
                 return;
             }
@@ -416,10 +418,30 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                     data.put("bandwidth", statistics.getBandwidth());
                     data.put("traffic", statistics.getTraffic());
                     methodChannel.invokeMethod("connectionStatistics", data);
+
+                    if (statistics.getBandwidth() > 0) {
+                        connectionStatus(true);
+                    }
                 }
+            }else if (state == Streamer.ConnectionState.IDLE || state == Streamer.ConnectionState.DISCONNECTED) {
+                ConnectionStatistics statistics = mConnectionStatistics.get(connectionId);
+                if (statistics != null) {
+                    statistics.update(mStreamerGL, connectionId);
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("bandwidth", statistics.getBandwidth());
+                    data.put("traffic", statistics.getTraffic());
+                }
+                connectionStatus(false);
+
             }
         }
     };
+
+    void connectionStatus(boolean connected) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("isConnected", connected);
+        methodChannel.invokeMethod("connectionStatus", data);
+    }
 
     protected void mute(boolean mute) {
         if (mStreamerGL == null) {
@@ -548,6 +570,11 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 permissions.put("hasAudioPermission", cameraPermissions.hasAudioPermission(activity));
                 permissions.put("hasCameraPermission", cameraPermissions.hasCameraPermission(activity));
                 result.success(permissions);
+                break;
+            case "reconnect":
+                mStreamerGL.releaseConnection(connectionId);
+                maybeCreateStream();
+                result.success("true");
                 break;
             case "requestPermissions":
                 cameraPermissions.requestPermissions(

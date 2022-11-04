@@ -6,6 +6,7 @@ import 'dart:collection';
 import 'package:flutter/services.dart';
 import 'package:flutter_larix/src/defs/connectionStatistics.dart';
 import 'package:flutter_larix/src/defs/connectionStatisticsFormated.dart';
+import 'package:flutter_larix/src/defs/connection_status.dart';
 import 'package:flutter_larix/src/defs/permissions.dart';
 import 'package:flutter_larix/src/defs/stream_changed.dart';
 import 'package:flutter_larix/src/flutter_larix_controller_options.dart';
@@ -34,6 +35,9 @@ class FlutterLarixController {
           break;
         case 'connectionStatistics':
           connectionStatistics(call.arguments);
+          return;
+        case 'connectionStatus':
+          _connectionStatus(call.arguments);
           return;
       }
       options.listener.call();
@@ -107,6 +111,10 @@ class FlutterLarixController {
     await _channel.invokeMethod('setDisplayRotation', value);
   }
 
+  Future<void> reconnect() async {
+    await _channel.invokeMethod('reconnect');
+  }
+
   Future<bool> getRotatePermission() async {
     bool permission = await _channel.invokeMethod('getRotatePermission');
     return permission;
@@ -151,6 +159,9 @@ class FlutterLarixController {
       connectionStatisticsStream =
       StreamController<ConnectionStatisticsFormatedModel>();
 
+  StreamController<ConnectionStatusModel> connectionStatusStream =
+      StreamController<ConnectionStatusModel>();
+
   void connectionStatistics(arguments) {
     ConnectionStatisticsModel streamChanged =
         ConnectionStatisticsModel.fromJson(
@@ -162,6 +173,13 @@ class FlutterLarixController {
         traffic: trafficToString(streamChanged.traffic),
       ),
     );
+  }
+
+  void _connectionStatus(arguments) {
+    ConnectionStatusModel streamChanged = ConnectionStatusModel.fromJson(
+      HashMap.from(arguments),
+    );
+    connectionStatusStream.add(streamChanged);
   }
 
   String bandwidthToString(int bps) {
