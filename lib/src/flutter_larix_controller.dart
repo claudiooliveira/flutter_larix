@@ -75,6 +75,14 @@ class FlutterLarixController {
     }
   }
 
+  Future<void> setBitRate(int bitrate) async {
+    await _channel.invokeMethod('setBitRate', bitrate);
+  }
+
+  Future<int> getBitRate() async {
+    return await _channel.invokeMethod('getBitRate');
+  }
+
   Future<void> stopStream() async {
     await _channel.invokeMethod('stopStream');
   }
