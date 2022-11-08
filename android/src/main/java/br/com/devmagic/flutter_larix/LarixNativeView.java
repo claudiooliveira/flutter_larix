@@ -70,6 +70,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     private Handler mHandler;
     private final Map<Integer, ConnectionStatistics> mConnectionStatistics = new HashMap();
     private final Map<Integer, Streamer.ConnectionState> mConnectionState = new HashMap<>();
+    protected int mCurrentBitrate;
 
     protected float mScaleFactor;
 
@@ -215,6 +216,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         if (mStreamerGL != null) {
             return;
         }
+        mCurrentBitrate = bitRate;
 
         builder = new StreamerGLBuilder();
         boolean camera2 = CameraRegistry.allowCamera2Support(mContext);
@@ -573,6 +575,16 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 permissions.put("hasAudioPermission", cameraPermissions.hasAudioPermission(activity));
                 permissions.put("hasCameraPermission", cameraPermissions.hasCameraPermission(activity));
                 result.success(permissions);
+                break;
+            case "setBitRate":
+                if (mStreamerGL == null) {
+                    return;
+                }
+                int bitRate = new Integer(call.arguments.toString());
+                mStreamerGL.changeBitRate(bitRate);
+                break;
+            case "getBitRate":
+                result.success(mCurrentBitrate);
                 break;
             case "reconnect":
                 if (mStreamerGL == null) {
