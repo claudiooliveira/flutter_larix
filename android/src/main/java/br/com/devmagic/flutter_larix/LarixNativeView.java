@@ -82,6 +82,8 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     private SurfaceHolder mHolder;
     private Timer mUpdateStatisticsTimer;
 
+    int bitRateValue = 2000;
+
     @NonNull
     StreamerGLBuilder builder;
     int connectionId = 0;
@@ -380,7 +382,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 public void run() {
                     mHandler.post(mUpdateStatistics);
                 }
-            }, 3000, 3000);
+            }, 2000, 2000);
         }
 
             Streamer.ConnectionState state = mConnectionState.get(connectionId);
@@ -410,6 +412,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
             }
 
             Streamer.ConnectionState state = mConnectionState.get(connectionId);
+            Log.e("STATE", "Value: " + state);
             if (state == Streamer.ConnectionState.RECORD) {
                 ConnectionStatistics statistics = mConnectionStatistics.get(connectionId);
                 if (statistics != null) {
@@ -572,6 +575,10 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 result.success(permissions);
                 break;
             case "reconnect":
+                if (mStreamerGL == null) {
+                    createStreamer(bitRateValue);
+                    return;
+                }
                 mStreamerGL.releaseConnection(connectionId);
                 maybeCreateStream();
                 result.success("true");
@@ -596,7 +603,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                         });
                 break;
             case "initCamera":
-                int bitRateValue = new Integer(call.arguments.toString());
+                bitRateValue = new Integer(call.arguments.toString());
                 
                 HashMap<String, Boolean> permission = checkPermissions();
                 if (permission.get("cameraAllowed") && permission.get("audioAllowed")) {
