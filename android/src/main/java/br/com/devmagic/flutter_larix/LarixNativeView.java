@@ -94,6 +94,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     private MethodChannel methodChannel;
 
+    private Timer reconnectTimer;
+    private TimerTask reconnectTimerTask = null;
+
 
     LarixNativeView(BinaryMessenger messenger, PermissionsRegistry permissionsAdder, CameraPermissions cameraPermissions ,Activity activity, @NonNull Context context, int id, @Nullable Map<String, Object> creationParams) {
         mContext = context;
@@ -426,6 +429,13 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
                     if (statistics.getBandwidth() > 0) {
                         connectionStatus(true);
+                        if (reconnectTimerTask != null) {
+                            Log.e("STREAM GL", "CANCEL!!!!!!");
+                            reconnectTimerTask.cancel();
+                            reconnectTimerTask = null;
+                            reconnectTimer.cancel();
+                            reconnectTimer = null;
+                        }
                     }
                 }
             }else if (state == Streamer.ConnectionState.IDLE || state == Streamer.ConnectionState.DISCONNECTED) {
@@ -437,6 +447,21 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                     data.put("traffic", statistics.getTraffic());
                 }
                 connectionStatus(false);
+
+                if (reconnectTimerTask == null) {
+                    reconnectTimerTask = new TimerTask() {
+                        @Override
+                        public void run() {
+                            Log.e("STREAM GL", "RECONNECT TIMER.....");
+                            mStreamerGL.releaseConnection(connectionId);
+                            maybeCreateStream();
+                        }
+                    };
+                }
+                if (reconnectTimer == null) {
+                    reconnectTimer = new Timer();
+                    reconnectTimer.schedule(reconnectTimerTask, 10000, 10000);
+                }
 
             }
         }
