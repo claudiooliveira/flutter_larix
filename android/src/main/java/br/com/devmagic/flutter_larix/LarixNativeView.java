@@ -453,7 +453,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                         @Override
                         public void run() {
                             Log.e("STREAM GL", "RECONNECT TIMER.....");
-                            mStreamerGL.releaseConnection(connectionId);
+                            if (mStreamerGL != null) {
+                                mStreamerGL.releaseConnection(connectionId);
+                            }
                             maybeCreateStream();
                         }
                     };
