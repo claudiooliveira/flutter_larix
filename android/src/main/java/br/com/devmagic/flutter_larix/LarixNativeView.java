@@ -6,11 +6,12 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.media.MediaCodecList;
-import android.media.MediaCodecInfo;
+//import android.media.MediaCodecList;
+//import android.media.MediaCodecInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
@@ -41,12 +42,12 @@ import br.com.devmagic.flutter_larix.camera.CameraPermissions;
 import br.com.devmagic.flutter_larix.camera.CameraPermissions.PermissionsRegistry;
 import br.com.devmagic.flutter_larix.camera.CameraRegistry;
 import br.com.devmagic.flutter_larix.camera.CameraSettings;
-import io.flutter.Log;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.platform.PlatformView;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +72,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     private final Map<Integer, ConnectionStatistics> mConnectionStatistics = new HashMap();
     private final Map<Integer, Streamer.ConnectionState> mConnectionState = new HashMap<>();
     protected int mCurrentBitrate;
+    private boolean recording = false;
 
     protected float mScaleFactor;
 
@@ -398,10 +400,39 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                     Map<String, Object> data = new HashMap<>();
                     data.put("bandwidth", statistics.getBandwidth());
                     data.put("traffic", statistics.getTraffic());
+
                     methodChannel.invokeMethod("connectionStatistics", data);
                 }
             }
 
+    }
+
+
+    String startRecord(String fileName){
+        recording = true;
+        File recordFile = createVideoPath(mContext, fileName);
+        if (recordFile != null && mStreamerGL != null) {
+            mStreamerGL.startRecord(recordFile);
+        }
+        return recordFile.getPath();
+    }
+
+    void stopRecord(){
+        recording = false;
+        mStreamerGL.stopRecord();
+    }
+
+
+    public static File createVideoPath(Context context, String fileName) {
+        File imageThumbsDirectory = context.getExternalFilesDir("FOLDER");
+        if (imageThumbsDirectory != null) {
+            if (!imageThumbsDirectory.exists()) {
+                imageThumbsDirectory.mkdir();
+            }
+        }
+        String appDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES).getAbsolutePath();
+        File file = new File(appDir, fileName);
+        return file;
     }
 
     protected final Runnable mUpdateStatistics = new Runnable() {
@@ -417,7 +448,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
             }
 
             Streamer.ConnectionState state = mConnectionState.get(connectionId);
-            Log.e("STATE", "Value: " + state);
+            //Log.e("STATE", "Value: " + state);
             if (state == Streamer.ConnectionState.RECORD) {
                 ConnectionStatistics statistics = mConnectionStatistics.get(connectionId);
                 if (statistics != null) {
@@ -543,6 +574,17 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 mStreamerGL.releaseConnection(connectionId);
                 mConnectionState.remove(connectionId);
                 result.success(connectionId);
+                break;
+            case "startRecord":
+                String fileName = call.arguments.toString();
+                String filePath = startRecord(fileName);
+                result.success(filePath);
+                break;
+            case "stopRecord":
+                stopRecord();
+                break;
+            case "isRecording":
+                result.success(recording);
                 break;
             case "flipCamera":
                 for (CameraInfo info : cameraList) {
