@@ -74,7 +74,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     protected int mCurrentBitrate;
     private boolean recording = false;
     File recordFile;
-    long recDuracao;
 
     protected float mScaleFactor;
 
@@ -399,7 +398,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                     Map<String, Object> data = new HashMap<>();
                     data.put("bandwidth", statistics.getBandwidth());
                     data.put("traffic", statistics.getTraffic());
-                    //recordController(statistics);
 
                     methodChannel.invokeMethod("connectionStatistics", data);
                 }
@@ -411,7 +409,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     String startRecord(String fileName){
         recording = true;
         recordFile = createVideoPath(mContext, fileName);
-        recDuracao = System.currentTimeMillis();
         if (recordFile != null && mStreamerGL != null) {
             System.out.println(recordFile.getPath());
             boolean success = mStreamerGL.startRecord(recordFile);
@@ -458,7 +455,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                     Map<String, Object> data = new HashMap<>();
                     data.put("bandwidth", statistics.getBandwidth());
                     data.put("traffic", statistics.getTraffic());
-                    //recordController(statistics);
                     methodChannel.invokeMethod("connectionStatistics", data);
 
                     if (statistics.getBandwidth() > 0) {
@@ -472,7 +468,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                     Map<String, Object> data = new HashMap<>();
                     data.put("bandwidth", statistics.getBandwidth());
                     data.put("traffic", statistics.getTraffic());
-                    //recordController(statistics);
                 }
                 connectionStatus(false);
 
