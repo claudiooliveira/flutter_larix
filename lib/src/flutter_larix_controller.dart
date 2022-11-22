@@ -75,6 +75,20 @@ class FlutterLarixController {
     }
   }
 
+  Future<void> stopRecord() async {
+    await _channel.invokeMethod('stopRecord' );
+  }
+
+  Future<String> startRecord(String? fileName) async {
+    String filePath = await _channel.invokeMethod('startRecord', fileName);
+    return filePath;
+  }
+
+  Future<bool> isRecording() async {
+    bool isRecording =  await _channel.invokeMethod('isRecording');
+    return isRecording;
+  }
+
   Future<void> setBitRate(int bitrate) async {
     await _channel.invokeMethod('setBitRate', bitrate);
   }

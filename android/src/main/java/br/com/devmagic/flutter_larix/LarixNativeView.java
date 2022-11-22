@@ -72,7 +72,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     private final Map<Integer, ConnectionStatistics> mConnectionStatistics = new HashMap();
     private final Map<Integer, Streamer.ConnectionState> mConnectionState = new HashMap<>();
     protected int mCurrentBitrate;
-    private boolean gravandoLocal = false;
+    private boolean recording = false;
     File recordFile;
     long recDuracao;
 
@@ -399,7 +399,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                     Map<String, Object> data = new HashMap<>();
                     data.put("bandwidth", statistics.getBandwidth());
                     data.put("traffic", statistics.getTraffic());
-                    recordController(statistics);
+                    //recordController(statistics);
 
                     methodChannel.invokeMethod("connectionStatistics", data);
                 }
@@ -407,41 +407,26 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     }
 
-    void recordController(ConnectionStatistics statistics){
-        if(statistics.getBandwidth() == 100){
-            if(!gravandoLocal){
-                startRecord();
-            }
-        }else if(gravandoLocal && statistics.getBandwidth() > 100){
-            stopRecord();
-        }
-    }
 
-    void startRecord(){
-        System.out.println("JAVA -  INICIAR GRAVACAO");
-        gravandoLocal = true;
-        recordFile = createVideoPath(mContext);
+    String startRecord(String fileName){
+        recording = true;
+        recordFile = createVideoPath(mContext, fileName);
         recDuracao = System.currentTimeMillis();
         if (recordFile != null && mStreamerGL != null) {
             System.out.println(recordFile.getPath());
             boolean success = mStreamerGL.startRecord(recordFile);
-            System.out.println("JAVA - INICIAR GRAVACAO STATUS :" + success);
         }
+        return recordFile.getPath();
     }
 
     void stopRecord(){
-        gravandoLocal = false;
-        System.out.println("JAVA - FIM DA GRAVACAO " + ((System.currentTimeMillis() - recDuracao)/1000));
-        System.out.println("JAVA - DURACAO" + ((System.currentTimeMillis() - recDuracao)/1000));
-        System.out.println("JAVA - PATH " + recordFile.getPath());
+        recording = false;
         mStreamerGL.stopRecord();
     }
 
 
-    public static File createVideoPath(Context context) {
-        String fileName  = "VID" + System.currentTimeMillis() + ".mp4";
+    public static File createVideoPath(Context context, String fileName) {
         File imageThumbsDirectory = context.getExternalFilesDir("FOLDER");
-
         if (imageThumbsDirectory != null) {
             if (!imageThumbsDirectory.exists()) {
                 imageThumbsDirectory.mkdir();
@@ -473,7 +458,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                     Map<String, Object> data = new HashMap<>();
                     data.put("bandwidth", statistics.getBandwidth());
                     data.put("traffic", statistics.getTraffic());
-                    recordController(statistics);
+                    //recordController(statistics);
                     methodChannel.invokeMethod("connectionStatistics", data);
 
                     if (statistics.getBandwidth() > 0) {
@@ -487,7 +472,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                     Map<String, Object> data = new HashMap<>();
                     data.put("bandwidth", statistics.getBandwidth());
                     data.put("traffic", statistics.getTraffic());
-                    recordController(statistics);
+                    //recordController(statistics);
                 }
                 connectionStatus(false);
 
@@ -569,6 +554,17 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 mStreamerGL.releaseConnection(connectionId);
                 mConnectionState.remove(connectionId);
                 result.success(connectionId);
+                break;
+            case "startRecord":
+                String fileName = call.arguments.toString();
+                String filePath = startRecord(fileName);
+                result.success(filePath);
+                break;
+            case "stopRecord":
+                stopRecord();
+                break;
+            case "isRecording":
+                result.success(recording);
                 break;
             case "flipCamera":
                 for (CameraInfo info : cameraList) {
