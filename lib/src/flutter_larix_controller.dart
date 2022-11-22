@@ -79,7 +79,7 @@ class FlutterLarixController {
     await _channel.invokeMethod('stopRecord' );
   }
 
-  Future<String> startRecord(String? fileName) async {
+  Future<String> startRecord(String fileName) async {
     String filePath = await _channel.invokeMethod('startRecord', fileName);
     return filePath;
   }
