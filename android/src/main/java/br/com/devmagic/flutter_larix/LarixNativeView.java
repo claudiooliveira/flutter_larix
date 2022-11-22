@@ -73,7 +73,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     private final Map<Integer, Streamer.ConnectionState> mConnectionState = new HashMap<>();
     protected int mCurrentBitrate;
     private boolean recording = false;
-    File recordFile;
 
     protected float mScaleFactor;
 
@@ -408,7 +407,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     String startRecord(String fileName){
         recording = true;
-        recordFile = createVideoPath(mContext, fileName);
+        File recordFile = createVideoPath(mContext, fileName);
         if (recordFile != null && mStreamerGL != null) {
             mStreamerGL.startRecord(recordFile);
         }
