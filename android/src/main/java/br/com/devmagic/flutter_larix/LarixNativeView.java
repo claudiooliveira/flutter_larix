@@ -410,8 +410,7 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         recording = true;
         recordFile = createVideoPath(mContext, fileName);
         if (recordFile != null && mStreamerGL != null) {
-            System.out.println(recordFile.getPath());
-            boolean success = mStreamerGL.startRecord(recordFile);
+            mStreamerGL.startRecord(recordFile);
         }
         return recordFile.getPath();
     }
