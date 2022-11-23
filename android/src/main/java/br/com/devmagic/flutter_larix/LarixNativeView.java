@@ -42,6 +42,7 @@ import br.com.devmagic.flutter_larix.camera.CameraPermissions;
 import br.com.devmagic.flutter_larix.camera.CameraPermissions.PermissionsRegistry;
 import br.com.devmagic.flutter_larix.camera.CameraRegistry;
 import br.com.devmagic.flutter_larix.camera.CameraSettings;
+import io.flutter.Log;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
