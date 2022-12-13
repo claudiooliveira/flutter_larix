@@ -668,7 +668,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                     return;
                 }
                 int bitRate = new Integer(call.arguments.toString());
-                android.util.Log.e("leandro boraaaa", " 2 Alterou bit rate automatico para " + bitRate );
                 mStreamerGL.changeBitRate(bitRate);
                 break;
             case "getBitRate":
