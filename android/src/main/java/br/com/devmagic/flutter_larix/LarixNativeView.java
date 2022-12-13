@@ -686,6 +686,14 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 maybeCreateStream();
                 result.success("true");
                 break;
+            case "stopAutomaticBitRate":
+                mConditioner.stop();
+                break;
+            case "startAutomaticBitRate":
+                int bitrate = new Integer(call.arguments.toString());
+                mConditioner.addConnection(connectionId);
+                mConditioner.start(mStreamerGL);
+                break;
             case "requestPermissions":
                 cameraPermissions.requestPermissions(
                         activity,
