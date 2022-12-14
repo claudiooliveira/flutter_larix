@@ -1,4 +1,4 @@
-package com.wmspanel.libcommon;
+package br.com.devmagic.flutter_larix.libcommon;
 
 import android.annotation.TargetApi;
 import android.content.ContentResolver;
