@@ -322,6 +322,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
             mStreamerGL.release();
             mStreamerGL = null;
         }
+        if (mHandler != null) {
+            mHandler.removeCallbacks(mUpdateStatistics);
+        }
     }
 
     private boolean isPortrait() {
@@ -410,6 +413,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
 
     String startRecord(String fileName){
+        if (recording) {
+            return "";
+        }
         recording = true;
         File recordFile = createVideoPath(mContext, fileName);
         if (recordFile != null && mStreamerGL != null) {
@@ -418,7 +424,10 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         return recordFile.getPath();
     }
 
-    void stopRecord(){
+    void stopRecord() {
+        if (!recording) {
+            return;
+        }
         recording = false;
         mStreamerGL.stopRecord();
     }
