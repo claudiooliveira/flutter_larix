@@ -153,6 +153,14 @@ class FlutterLarixController {
   Future<void> setAutoFocus(bool autoFocus) async {
     await _channel.invokeMethod('setAutoFocus', autoFocus);
   }
+  
+  Future<void> startAutomaticBitRate(int bitrate) async {
+    await _channel.invokeMethod('startAutomaticBitRate', bitrate);
+  }
+
+  Future<void> stopAutomaticBitRate() async {
+    await _channel.invokeMethod('stopAutomaticBitRate');
+  }
 
   Future<void> toggleTorch() async {
     var result = await _channel.invokeMethod('toggleTorch');

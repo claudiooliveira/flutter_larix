@@ -1,4 +1,6 @@
-package com.wmspanel.libcommon;
+package br.com.devmagic.flutter_larix.libcommon;
+
+import static java.lang.Math.atan;
 
 import android.content.Context;
 import android.hardware.camera2.CameraAccessException;
@@ -19,8 +21,6 @@ import com.wmspanel.libstream.Streamer;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.lang.Math.atan;
 
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 public final class CameraRegistry21 extends CameraRegistry {
