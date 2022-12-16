@@ -3,13 +3,10 @@ package br.com.devmagic.flutter_larix;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.os.Build;
 
-import com.wmspanel.libcommon.CameraInfo;
-import com.wmspanel.libcommon.MediaCodecUtils;
 import com.wmspanel.libstream.Streamer;
 import com.wmspanel.libstream.VideoConfig;
 
@@ -17,7 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import br.com.devmagic.flutter_larix.camera.CameraSettings;
+import br.com.devmagic.flutter_larix.libcommon.MediaCodecUtils;
 
 public class VideoEncoderSettings {
 
@@ -166,10 +163,6 @@ public class VideoEncoderSettings {
         }
     }
 
-    public static float fps(final Context context,
-                            final CameraInfo cameraInfo) {
-        return Float.parseFloat("30");
-    }
 
     public static int keyFrameInterval(final Context context) {
         //return Settings.parseIntSafe(context, R.string.key_frame_interval_key, R.string.key_frame_interval_default);

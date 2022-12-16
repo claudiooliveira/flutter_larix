@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.wmspanel.libcommon;
+package br.com.devmagic.flutter_larix.libcommon;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.FrameLayout;
 
 /**

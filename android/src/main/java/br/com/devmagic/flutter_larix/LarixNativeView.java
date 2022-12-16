@@ -1,13 +1,11 @@
 package br.com.devmagic.flutter_larix;
 
 import android.Manifest;
-import android.content.pm.PackageManager;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-//import android.media.MediaCodecList;
-//import android.media.MediaCodecInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,13 +20,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.wmspanel.libstream.AudioConfig;
 import com.wmspanel.libstream.CameraConfig;
-import com.wmspanel.libcommon.ConnectionStatistics;
 import com.wmspanel.libstream.ConnectionConfig;
 import com.wmspanel.libstream.Streamer;
 import com.wmspanel.libstream.StreamerGL;
@@ -37,17 +35,6 @@ import com.wmspanel.libstream.VideoConfig;
 
 import org.json.JSONObject;
 
-import br.com.devmagic.flutter_larix.camera.CameraInfo;
-import br.com.devmagic.flutter_larix.camera.CameraPermissions;
-import br.com.devmagic.flutter_larix.camera.CameraPermissions.PermissionsRegistry;
-import br.com.devmagic.flutter_larix.camera.CameraRegistry;
-import br.com.devmagic.flutter_larix.camera.CameraSettings;
-import io.flutter.Log;
-import io.flutter.plugin.common.BinaryMessenger;
-import io.flutter.plugin.common.MethodCall;
-import io.flutter.plugin.common.MethodChannel;
-import io.flutter.plugin.platform.PlatformView;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -55,12 +42,26 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import br.com.devmagic.flutter_larix.camera.CameraInfo;
+import br.com.devmagic.flutter_larix.camera.CameraPermissions;
+import br.com.devmagic.flutter_larix.camera.CameraPermissions.PermissionsRegistry;
+import br.com.devmagic.flutter_larix.camera.CameraRegistry;
+import br.com.devmagic.flutter_larix.camera.CameraSettings;
+import br.com.devmagic.flutter_larix.conditioner.StreamConditionerBase;
+import br.com.devmagic.flutter_larix.libcommon.ConnectionStatistics;
+import io.flutter.Log;
+import io.flutter.plugin.common.BinaryMessenger;
+import io.flutter.plugin.common.MethodCall;
+import io.flutter.plugin.common.MethodChannel;
+import io.flutter.plugin.platform.PlatformView;
+
 class LarixNativeView implements PlatformView, Streamer.Listener, Application.ActivityLifecycleCallbacks, MethodChannel.MethodCallHandler {
     @NonNull private final LinearLayout container;
 
     private static final String TAG = "StreamerFragment";
 
     private StreamerGL mStreamerGL;
+    private StreamConditionerBase mConditioner;
     private final PermissionsRegistry permissionsRegistry;
     private final CameraPermissions cameraPermissions;
     private List<CameraInfo> cameraList;
@@ -304,6 +305,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         }
 
         updatePreviewRatio(mPreviewFrame, mSize);
+
+        mConditioner = StreamConditionerBase.newInstance(mContext,
+                videoConfig.bitRate, activeCameraInfo);
     }
 
     @NonNull
@@ -381,6 +385,12 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
             conn.uri = mUri;
 
             connectionId = mStreamerGL.createConnection(conn);
+            if (connectionId != -1) {
+                if (mConditioner != null) {
+                    mConditioner.addConnection(connectionId);
+                    mConditioner.start(mStreamerGL);
+                }
+            }
 
             mConnectionStatistics.put(connectionId, new ConnectionStatistics());
             if (mUpdateStatisticsTimer != null) {
@@ -497,6 +507,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                             if (mStreamerGL != null) {
                                 mStreamerGL.releaseConnection(connectionId);
                             }
+                            if (mConditioner != null) {
+                                mConditioner.removeConnection(connectionId);
+                            }
                             maybeCreateStream();
                         }
                     };
@@ -581,8 +594,12 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 result.success(connectionId);
                 break;
             case "stopStream":
+                if (mConditioner != null) {
+                    mConditioner.removeConnection(connectionId);
+                }
                 mStreamerGL.releaseConnection(connectionId);
                 mConnectionState.remove(connectionId);
+
                 result.success(connectionId);
                 break;
             case "startRecord":
@@ -670,9 +687,20 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                     createStreamer(bitRateValue);
                     return;
                 }
+                if (mConditioner != null) {
+                    mConditioner.removeConnection(connectionId);
+                }
                 mStreamerGL.releaseConnection(connectionId);
                 maybeCreateStream();
                 result.success("true");
+                break;
+            case "stopAutomaticBitRate":
+                mConditioner.stop();
+                break;
+            case "startAutomaticBitRate":
+                int bitrate = new Integer(call.arguments.toString());
+                mConditioner.addConnection(connectionId);
+                mConditioner.start(mStreamerGL);
                 break;
             case "requestPermissions":
                 cameraPermissions.requestPermissions(
@@ -705,6 +733,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 }
                 break;
             case "disposeCamera":
+                if (mConditioner != null) {
+                    mConditioner.removeConnection(connectionId);
+                }
                 if (mStreamerGL != null) {
                     mStreamerGL.release();
                     mStreamerGL = null;
