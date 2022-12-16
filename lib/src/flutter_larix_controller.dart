@@ -76,7 +76,7 @@ class FlutterLarixController {
   }
 
   Future<void> stopRecord() async {
-    await _channel.invokeMethod('stopRecord' );
+    await _channel.invokeMethod('stopRecord');
   }
 
   Future<String> startRecord(String fileName) async {
@@ -85,7 +85,7 @@ class FlutterLarixController {
   }
 
   Future<bool> isRecording() async {
-    bool isRecording =  await _channel.invokeMethod('isRecording');
+    bool isRecording = await _channel.invokeMethod('isRecording');
     return isRecording;
   }
 
@@ -150,6 +150,10 @@ class FlutterLarixController {
     await _channel.invokeMethod('setZoom', zoom);
   }
 
+  Future<void> setAutoFocus(bool autoFocus) async {
+    await _channel.invokeMethod('setAutoFocus', autoFocus);
+  }
+  
   Future<void> startAutomaticBitRate(int bitrate) async {
     await _channel.invokeMethod('startAutomaticBitRate', bitrate);
   }

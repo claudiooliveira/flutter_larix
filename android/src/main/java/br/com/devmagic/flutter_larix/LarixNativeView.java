@@ -24,6 +24,7 @@ import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import android.hardware.camera2.CaptureRequest;
 
 import com.wmspanel.libstream.AudioConfig;
 import com.wmspanel.libstream.CameraConfig;
@@ -32,6 +33,7 @@ import com.wmspanel.libstream.Streamer;
 import com.wmspanel.libstream.StreamerGL;
 import com.wmspanel.libstream.StreamerGLBuilder;
 import com.wmspanel.libstream.VideoConfig;
+import com.wmspanel.libstream.FocusMode;
 
 import org.json.JSONObject;
 
@@ -86,6 +88,8 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     private SurfaceView mSurfaceView;
     private SurfaceHolder mHolder;
     private Timer mUpdateStatisticsTimer;
+
+    private final FocusMode mFocusMode = new FocusMode();
 
     int bitRateValue = 2000;
 
@@ -662,6 +666,10 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 Boolean zoomResult = zoom(D.floatValue());
                 result.success(zoomResult.toString());
                 break;
+            case "setAutoFocus":
+                Boolean autoFocus = new Boolean(call.arguments.toString());
+                changeFocusMode(autoFocus);
+                break;
             case "toggleTorch":
                 mStreamerGL.toggleTorch();
                 result.success(mStreamerGL.isTorchOn() ? "true" : "false");
@@ -759,6 +767,18 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         mStreamerGL.zoomTo(Math.round(mScaleFactor));
 
         return true; // consume touch event
+    }
+
+    protected void changeFocusMode(boolean isAutoFocus) {
+        if(isAutoFocus == false) {
+            mFocusMode.focusMode = CaptureRequest.CONTROL_AF_MODE_OFF;
+            mFocusMode.focusDistance = 0.0f;
+        }
+        else {
+            mFocusMode.focusMode = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO;
+        }
+
+        mStreamerGL.focus(mFocusMode);
     }
 
 }
