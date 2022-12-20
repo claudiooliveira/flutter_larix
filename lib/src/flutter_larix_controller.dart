@@ -146,8 +146,14 @@ class FlutterLarixController {
     await _channel.invokeMethod('flipCamera');
   }
 
-  Future<void> setZoom(double zoom) async {
-    await _channel.invokeMethod('setZoom', zoom);
+  Future<double> setZoom(double zoom) async {
+    double zoomResult = await _channel.invokeMethod('setZoom', zoom);
+    return zoomResult;
+  }
+
+  Future<double> getZoomMax() async {
+    double zoomResult = await _channel.invokeMethod('getZoomMax');
+    return zoomResult;
   }
 
   Future<void> setAutoFocus(bool autoFocus) async {

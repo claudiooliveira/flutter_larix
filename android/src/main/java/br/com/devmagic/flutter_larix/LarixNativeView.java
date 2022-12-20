@@ -663,8 +663,12 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 break;
             case "setZoom":
                 Double D = new Double(call.arguments.toString());
-                Boolean zoomResult = zoom(D.floatValue());
-                result.success(zoomResult.toString());
+                double zoomResult = zoom(D.floatValue());
+                result.success(zoomResult);
+                break;
+            case "getZoomMax":
+                Float maxZoom = new Float(mStreamerGL.getMaxZoom());
+                result.success(maxZoom.doubleValue());
                 break;
             case "setAutoFocus":
                 Boolean autoFocus = new Boolean(call.arguments.toString());
@@ -755,9 +759,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     }
 
-    protected boolean zoom(float scaleFactor) {
+    protected double zoom(float scaleFactor) {
         if (mStreamerGL == null || mVideoCaptureState != Streamer.CaptureState.STARTED) {
-            return false;
+            return 0.0;
         }
 
         // Don't let the object get too small or too large.
@@ -766,7 +770,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
         mStreamerGL.zoomTo(Math.round(mScaleFactor));
 
-        return true; // consume touch event
+        Float zoomFloat = new Float(Math.round(mScaleFactor));
+
+        return zoomFloat.doubleValue(); // consume touch event
     }
 
     protected void changeFocusMode(boolean isAutoFocus) {
