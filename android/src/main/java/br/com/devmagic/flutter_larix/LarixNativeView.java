@@ -666,6 +666,10 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 double zoomResult = zoom(D.floatValue());
                 result.success(zoomResult);
                 break;
+            case "getZoomMax":
+                Float float_obj = new Float(mStreamerGL.getMaxZoom());
+                result.success(float_obj.doubleValue());
+                break;
             case "setAutoFocus":
                 Boolean autoFocus = new Boolean(call.arguments.toString());
                 changeFocusMode(autoFocus);
@@ -762,11 +766,17 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
         // Don't let the object get too small or too large.
         mScaleFactor = mScaleFactor * scaleFactor;
+
+        System.out.println("kklk scaleFator: " + scaleFactor);
+        System.out.println("kklk mScaleFator: " + mScaleFactor);
+        System.out.println("kklk MathMin: " + Math.min(mScaleFactor, mStreamerGL.getMaxZoom()));
+        System.out.println("kklk MathMax: " + Math.max(1.0f, Math.min(mScaleFactor, mStreamerGL.getMaxZoom())));
+
         mScaleFactor = Math.max(1.0f, Math.min(mScaleFactor, mStreamerGL.getMaxZoom()));
 
         mStreamerGL.zoomTo(Math.round(mScaleFactor));
 
-        Float float_obj1 = new Float(Math.round(mScaleFactor));  
+        Float float_obj1 = new Float(Math.round(mScaleFactor));
 
         return float_obj1.doubleValue(); // consume touch event
     }

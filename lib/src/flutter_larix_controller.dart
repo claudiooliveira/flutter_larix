@@ -151,6 +151,11 @@ class FlutterLarixController {
     return zoomResult;
   }
 
+  Future<double> getZoomMax() async {
+    double zoomResult = await _channel.invokeMethod('getZoomMax');
+    return zoomResult;
+  }
+
   Future<void> setAutoFocus(bool autoFocus) async {
     await _channel.invokeMethod('setAutoFocus', autoFocus);
   }
