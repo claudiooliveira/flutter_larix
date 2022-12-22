@@ -662,8 +662,11 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 result.success("true");
                 break;
             case "setZoom":
-                Double D = new Double(call.arguments.toString());
-                double zoomResult = zoom(D.floatValue());
+                final double zoom = call.argument("zoom");
+                final boolean isManual = call.argument("isManual");
+                
+                Double D = new Double(zoom);
+                double zoomResult = zoom(D.floatValue(), isManual);
                 result.success(zoomResult);
                 break;
             case "getZoomMax":
@@ -759,13 +762,18 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
     }
 
-    protected double zoom(float scaleFactor) {
+    protected double zoom(float scaleFactor, boolean isManual) {
         if (mStreamerGL == null || mVideoCaptureState != Streamer.CaptureState.STARTED) {
             return 0.0;
         }
 
         // Don't let the object get too small or too large.
-        mScaleFactor = mScaleFactor * scaleFactor;
+        if(isManual) {
+            mScaleFactor = mScaleFactor * scaleFactor;
+        } else {
+            mScaleFactor = scaleFactor;
+        }
+
         mScaleFactor = Math.max(1.0f, Math.min(mScaleFactor, mStreamerGL.getMaxZoom()));
 
         mStreamerGL.zoomTo(Math.round(mScaleFactor));

@@ -146,8 +146,12 @@ class FlutterLarixController {
     await _channel.invokeMethod('flipCamera');
   }
 
-  Future<double> setZoom(double zoom) async {
-    double zoomResult = await _channel.invokeMethod('setZoom', zoom);
+  Future<double> setZoom(double zoom, bool isManual) async {
+    double zoomResult =
+        await _channel.invokeMethod('setZoom', <String, dynamic>{
+      'zoom': zoom,
+      'isManual': isManual,
+    });
     return zoomResult;
   }
 
@@ -159,7 +163,7 @@ class FlutterLarixController {
   Future<void> setAutoFocus(bool autoFocus) async {
     await _channel.invokeMethod('setAutoFocus', autoFocus);
   }
-  
+
   Future<void> startAutomaticBitRate(int bitrate) async {
     await _channel.invokeMethod('startAutomaticBitRate', bitrate);
   }
