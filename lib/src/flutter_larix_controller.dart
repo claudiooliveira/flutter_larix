@@ -150,7 +150,7 @@ class FlutterLarixController {
     double zoomResult =
         await _channel.invokeMethod('setZoom', <String, dynamic>{
       'zoom': zoom,
-      'isManual': isManual,
+      'isManual': isManual ?? false,
     });
     return zoomResult;
   }
