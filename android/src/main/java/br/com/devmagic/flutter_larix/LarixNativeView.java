@@ -786,7 +786,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
     protected void changeFocusMode(boolean isAutoFocus) {
         if(isAutoFocus == false) {
             mFocusMode.focusMode = CaptureRequest.CONTROL_AF_MODE_OFF;
-            mFocusMode.focusDistance = 0.0f;
         }
         else {
             mFocusMode.focusMode = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO;
