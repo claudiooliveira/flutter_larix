@@ -38,6 +38,7 @@ import com.wmspanel.libstream.FocusMode;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -673,9 +674,28 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
                 Float maxZoom = new Float(mStreamerGL.getMaxZoom());
                 result.success(maxZoom.doubleValue());
                 break;
-            case "setAutoFocus":
-                Boolean autoFocus = new Boolean(call.arguments.toString());
-                changeFocusMode(autoFocus);
+            case "setFocus":
+                HashMap<String, Object> focus = (HashMap<String, Object>) call.arguments;
+                Boolean autoFocus = (Boolean)focus.get("isAutoFocus");
+                Float focusDistance = new Float(focus.get("distanceFocus").toString());
+                changeFocusMode(autoFocus, focusDistance);
+                result.success(focus);
+                break;
+            case "getCameraInfo":
+                List<HashMap<String, Object>> camerasList = new ArrayList<>();
+                for (CameraInfo info : cameraList) {
+                    HashMap<String, Object> camera = new HashMap();
+                    camera.put("minimumFocusDistance", info.minimumFocusDistance);
+                    camera.put("isTorchSupported", info.isTorchSupported);
+                    camera.put("maxZoom", info.maxZoom);
+                    camera.put("isZoomSupported",info.isZoomSupported);
+                    camera.put("maxExposure",info.maxExposure);
+                    camera.put("minExposure",info.minExposure);
+                    camera.put("lensFacing",info.lensFacing);
+                    camera.put("cameraId",info.cameraId);
+                    camerasList.add(camera);
+                }
+                result.success(camerasList);
                 break;
             case "toggleTorch":
                 mStreamerGL.toggleTorch();
@@ -783,13 +803,14 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         return zoomFloat.doubleValue(); // consume touch event
     }
 
-    protected void changeFocusMode(boolean isAutoFocus) {
+    protected void changeFocusMode(boolean isAutoFocus, float focusDistance ) {
         if(isAutoFocus == false) {
             mFocusMode.focusMode = CaptureRequest.CONTROL_AF_MODE_OFF;
-            mFocusMode.focusDistance = 0.0f;
+            mFocusMode.focusDistance = focusDistance;
         }
         else {
             mFocusMode.focusMode = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO;
+            mFocusMode.focusDistance = 0;
         }
 
         mStreamerGL.focus(mFocusMode);
