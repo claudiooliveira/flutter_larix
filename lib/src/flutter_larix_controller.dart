@@ -4,9 +4,11 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_larix/src/defs/camera_info_model.dart';
 import 'package:flutter_larix/src/defs/connectionStatistics.dart';
 import 'package:flutter_larix/src/defs/connectionStatisticsFormated.dart';
 import 'package:flutter_larix/src/defs/connection_status.dart';
+import 'package:flutter_larix/src/defs/focus_model.dart';
 import 'package:flutter_larix/src/defs/permissions.dart';
 import 'package:flutter_larix/src/defs/stream_changed.dart';
 import 'package:flutter_larix/src/flutter_larix_controller_options.dart';
@@ -150,7 +152,7 @@ class FlutterLarixController {
     double zoomResult =
         await _channel.invokeMethod('setZoom', <String, dynamic>{
       'zoom': zoom,
-      'isManual': isManual ?? false,
+      'isManual': isManual,
     });
     return zoomResult;
   }
@@ -160,8 +162,20 @@ class FlutterLarixController {
     return zoomResult;
   }
 
-  Future<void> setAutoFocus(bool autoFocus) async {
-    await _channel.invokeMethod('setAutoFocus', autoFocus);
+  Future<List<CameraInfoModel>> getCameraInfo() async {
+    var cameraInfo =
+        (await _channel.invokeMethod('getCameraInfo')) as List<dynamic>;
+    return List.generate(
+      cameraInfo.length,
+      (int value) => CameraInfoModel.fromHashMap(cameraInfo[value]),
+    );
+  }
+
+  Future<FocusModel> setFocus(bool isAutoFocus, double distanceFocus) async {
+    return FocusModel.fromHashMap(await _channel.invokeMethod('setFocus', {
+      'isAutoFocus': isAutoFocus,
+      'distanceFocus': distanceFocus,
+    }));
   }
 
   Future<void> startAutomaticBitRate(int bitrate) async {
