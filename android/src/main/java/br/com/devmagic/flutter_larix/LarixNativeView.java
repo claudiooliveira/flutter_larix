@@ -796,9 +796,9 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
 
         mScaleFactor = Math.max(1.0f, Math.min(mScaleFactor, mStreamerGL.getMaxZoom()));
 
-        mStreamerGL.zoomTo(Math.round(mScaleFactor));
+        mStreamerGL.zoomTo(mScaleFactor);
 
-        Float zoomFloat = new Float(Math.round(mScaleFactor));
+        Float zoomFloat = new Float(mScaleFactor);
 
         return zoomFloat.doubleValue(); // consume touch event
     }
