@@ -665,7 +665,6 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
             case "setZoom":
                 final double zoom = call.argument("zoom");
                 final boolean isManual = call.argument("isManual");
-                
                 Double D = new Double(zoom);
                 double zoomResult = zoom(D.floatValue(), isManual);
                 result.success(zoomResult);
@@ -786,21 +785,21 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         if (mStreamerGL == null || mVideoCaptureState != Streamer.CaptureState.STARTED) {
             return 0.0;
         }
-
         // Don't let the object get too small or too large.
         if(isManual) {
-            mScaleFactor = mScaleFactor * scaleFactor;
+            mScaleFactor *= scaleFactor;
+            mScaleFactor = Math.max(1.0f, Math.min(mScaleFactor, mStreamerGL.getMaxZoom()));
+            mStreamerGL.zoomTo(Math.round(mScaleFactor));
+            Float zoomFloat = new Float(Math.round(mScaleFactor));
+            return zoomFloat.doubleValue(); // consume touch event
         } else {
             mScaleFactor = scaleFactor;
+            mScaleFactor = Math.max(1.0f, Math.min(mScaleFactor, mStreamerGL.getMaxZoom()));
+            mStreamerGL.zoomTo(mScaleFactor);
+            Float zoomFloat = new Float(mScaleFactor);
+            return zoomFloat.doubleValue(); 
         }
 
-        mScaleFactor = Math.max(1.0f, Math.min(mScaleFactor, mStreamerGL.getMaxZoom()));
-
-        mStreamerGL.zoomTo(mScaleFactor);
-
-        Float zoomFloat = new Float(mScaleFactor);
-
-        return zoomFloat.doubleValue(); // consume touch event
     }
 
     protected void changeFocusMode(boolean isAutoFocus, float focusDistance ) {
