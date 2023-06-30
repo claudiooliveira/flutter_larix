@@ -29,6 +29,7 @@ import android.hardware.camera2.CaptureRequest;
 import com.wmspanel.libstream.AudioConfig;
 import com.wmspanel.libstream.CameraConfig;
 import com.wmspanel.libstream.ConnectionConfig;
+import com.wmspanel.libstream.SrtConfig;
 import com.wmspanel.libstream.Streamer;
 import com.wmspanel.libstream.StreamerGL;
 import com.wmspanel.libstream.StreamerGLBuilder;
@@ -38,9 +39,12 @@ import com.wmspanel.libstream.FocusMode;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -57,6 +61,9 @@ import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.platform.PlatformView;
+
+import inet.ipaddr.HostName;
+import inet.ipaddr.IPAddress;
 
 class LarixNativeView implements PlatformView, Streamer.Listener, Application.ActivityLifecycleCallbacks, MethodChannel.MethodCallHandler {
     @NonNull private final LinearLayout container;
@@ -386,10 +393,35 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
         if (mStreamerGL != null
                 && mVideoCaptureState == Streamer.CaptureState.STARTED
                 && mAudioCaptureState == Streamer.CaptureState.STARTED) {
-            ConnectionConfig conn = new ConnectionConfig();
-            conn.uri = mUri;
 
-            connectionId = mStreamerGL.createConnection(conn);
+            Uri uri = Uri.parse(mUri);
+            String scheme = uri.getScheme();
+
+            if (scheme.startsWith("rtmp") || scheme.startsWith("rtsp")) {
+                final ConnectionConfig config = new ConnectionConfig();
+                config.uri = mUri;
+
+                connectionId = mStreamerGL.createConnection(config);
+            } else if (scheme.equals("srt")) {
+                final SrtConfig config = new SrtConfig();
+                final IPAddress address = new HostName(uri.getHost()).asAddress();
+                if (address != null && address.isIPv6()) {
+                    // Convert literal IPv6 address to IPv6 address
+                    // An IPv6 address is represented as eight groups of four hexadecimal digits
+                    // 2001:0db8:85a3:0000:0000:8a2e:0370:7334
+                    // Literal IPv6 addresses are enclosed in square brackets
+                    // https://[2001:db8:85a3:8d3:1319:8a2e:370:7348]:443
+                    config.host = address.toFullString();
+                } else {
+                    config.host = uri.getHost();
+                }
+                config.port = uri.getPort();
+                config.latency = 2000;
+                connectionId = mStreamerGL.createConnection(config);
+            }
+
+
+
             if (connectionId != -1) {
                 if (mConditioner != null) {
                     mConditioner.addConnection(connectionId);
@@ -411,8 +443,8 @@ class LarixNativeView implements PlatformView, Streamer.Listener, Application.Ac
             }, 2000, 2000);
         }
 
-            Streamer.ConnectionState state = mConnectionState.get(connectionId);
-            if (state == Streamer.ConnectionState.RECORD) {
+        Streamer.ConnectionState state = mConnectionState.get(connectionId);
+        if (state == Streamer.ConnectionState.RECORD) {
                 ConnectionStatistics statistics = mConnectionStatistics.get(connectionId);
                 if (statistics != null) {
                     statistics.update(mStreamerGL, connectionId);

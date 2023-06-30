@@ -1,5 +1,6 @@
 package br.com.devmagic.flutter_larix.libcommon;
 
+import android.util.Log;
 import java.net.URI;
 import java.net.URISyntaxException;
 
